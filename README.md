@@ -63,12 +63,8 @@ git clone https://github.com/johnriggs1959/voice-flow.git
 cd voice-flow
 
 # Serve the application
-python -m http.server 8080
-# or
-npx serve .
+python3 -m http.server 8020
 
-# Open your browser
-open https://localhost:8080
 ```
 The app automatically detects and connects to your local AI services!
 
@@ -301,7 +297,7 @@ docker restart whisper-api
 ```  
 Voice Input Issues
 
-* Ensure you're using HTTPS or localhost
+* Ensure you're using HTTP or localhost
 * Check browser microphone permissions
 * Verify microphone is working in other apps
 * Try refreshing the page
