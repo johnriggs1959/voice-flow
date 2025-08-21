@@ -17,6 +17,32 @@ Voice Flow is a **production-ready AI assistant** that seamlessly combines voice
 - ⚡ **Real-time Performance Monitoring** - Live metrics for STT, LLM, and TTS processing
 - 🛡️ **Enterprise-Grade Error Handling** - Automatic retry, graceful degradation, and smart recovery
 
+## 📸 Screenshots
+
+### Main Interface
+![Voice Flow Main Interface](screenshots/main-interface.png)
+*Clean, modern chat interface with real-time conversation management and performance monitoring*
+
+### Comprehensive Settings System
+
+#### Model Configuration
+![Model Settings](screenshots/settings-model.png)
+*Dynamic model selection with automatic detection of installed Ollama models and parameter tuning*
+
+#### Audio & Voice Settings  
+![Audio Settings](screenshots/settings-audio.png)
+*Professional audio controls with 14 voice options, speech rate adjustment, and volume controls*
+
+#### Appearance & Themes
+![Appearance Settings](screenshots/settings-appearance.png)
+*Multiple theme options with smooth transitions and accessibility features*
+
+#### Logging & Analytics
+![Logging Settings](screenshots/settings-logging.png)
+*Enterprise-grade logging with privacy controls, data export, and analytics configuration*
+
+---
+
 ## 🚀 Quick Start
 
 ### Prerequisites
