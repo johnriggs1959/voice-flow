@@ -1,0 +1,956 @@
+/* Theme System CSS Variables - UPDATED with Settings Select Styling */
+
+:root {
+
+        /* Default to dark theme variables to prevent FOUC */
+    --transition-duration: 0.3s;
+    --transition-timing: ease-in-out;
+    
+    /* Border radius constants */
+    --border-radius-sm: 0.5rem;
+    --border-radius-md: 0.75rem;
+    --border-radius-lg: 1rem;
+    --border-radius-xl: 1.5rem;
+    
+    /* Shadow definitions */
+    --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.1);
+    --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.15);
+    --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.2);
+    --shadow-xl: 0 16px 64px rgba(0, 0, 0, 0.25);
+    
+    /* DARK THEME AS DEFAULT - Prevents purple flash */
+    --bg-primary: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+    --bg-secondary: rgba(255, 255, 255, 0.05);
+    --bg-tertiary: rgba(255, 255, 255, 0.02);
+    --bg-accent: rgba(255, 255, 255, 0.1);
+    
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.5);
+    --text-muted: rgba(255, 255, 255, 0.3);
+    
+    --border-primary: rgba(255, 255, 255, 0.1);
+    --border-secondary: rgba(255, 255, 255, 0.05);
+    --border-accent: rgba(255, 255, 255, 0.2);
+    
+    --status-success: #22c55e;
+    --status-error: #ef4444;
+    --status-warning: #f59e0b;
+    --status-info: #3b82f6;
+    
+    --btn-primary-bg: linear-gradient(135deg, #374151, #4b5563);
+    --btn-primary-hover: linear-gradient(135deg, #4b5563, #6b7280);
+    --btn-secondary-bg: rgba(255, 255, 255, 0.05);
+    --btn-secondary-hover: rgba(255, 255, 255, 0.1);
+    
+    --input-bg: rgba(255, 255, 255, 0.05);
+    --input-border: rgba(255, 255, 255, 0.1);
+    --input-focus: #6b7280;
+    --input-placeholder: rgba(255, 255, 255, 0.4);
+    
+    --audio-bg: rgba(255, 255, 255, 0.05);
+    --audio-border: rgba(255, 255, 255, 0.1);
+    
+    --modal-overlay: rgba(0, 0, 0, 0.7);
+    --modal-bg: rgba(20, 20, 20, 0.95);
+    --modal-border: rgba(255, 255, 255, 0.1);
+    
+    --select-bg: rgba(40, 40, 40, 0.8);
+    --select-option-bg: #2a2a2a;
+    --select-option-hover: #404040;
+    --select-arrow-color: rgba(255, 255, 255, 0.7);
+    
+    /* Model parameter control colors */
+    --slider-track-bg: rgba(255, 255, 255, 0.1);
+    --slider-track-fill: linear-gradient(90deg, #374151, #6b7280);
+    --slider-thumb-bg: #9ca3af;
+    --slider-thumb-hover: #d1d5db;
+    --slider-thumb-active: #f3f4f6;
+    --parameter-input-bg: rgba(255, 255, 255, 0.08);
+    --parameter-input-border: rgba(255, 255, 255, 0.15);
+}
+
+/* Current Theme (Purple Gradient) - Now overrides the dark default */
+[data-theme="current"] {
+    /* Background colors */
+    --bg-primary: linear-gradient(to bottom, #4c1d95, #3b0764);
+    --bg-secondary: rgba(255, 255, 255, 0.1);
+    --bg-tertiary: rgba(255, 255, 255, 0.05);
+    --bg-accent: rgba(255, 255, 255, 0.2);
+    
+    /* Text colors */
+    --text-primary: rgba(255, 255, 255, 0.95);
+    --text-secondary: rgba(255, 255, 255, 0.7);
+    --text-tertiary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.4);
+    
+    /* Border colors */
+    --border-primary: rgba(255, 255, 255, 0.2);
+    --border-secondary: rgba(255, 255, 255, 0.1);
+    --border-accent: rgba(255, 255, 255, 0.3);
+    
+    /* Status colors */
+    --status-success: #10b981;
+    --status-error: #ef4444;
+    --status-warning: #eab308;
+    --status-info: #3b82f6;
+    
+    /* Button colors */
+    --btn-primary-bg: linear-gradient(135deg, #7c3aed, #db2777);
+    --btn-primary-hover: linear-gradient(135deg, #8b5cf6, #ec4899);
+    --btn-secondary-bg: rgba(255, 255, 255, 0.1);
+    --btn-secondary-hover: rgba(255, 255, 255, 0.2);
+    
+    /* Input colors */
+    --input-bg: rgba(255, 255, 255, 0.1);
+    --input-border: rgba(255, 255, 255, 0.2);
+    --input-focus: #7c3aed;
+    --input-placeholder: rgba(255, 255, 255, 0.6);
+    
+    /* Audio player colors */
+    --audio-bg: rgba(255, 255, 255, 0.1);
+    --audio-border: rgba(255, 255, 255, 0.2);
+    
+    /* Modal colors */
+    --modal-overlay: rgba(0, 0, 0, 0.5);
+    --modal-bg: rgba(255, 255, 255, 0.1);
+    --modal-border: rgba(255, 255, 255, 0.2);
+    
+    /* Enhanced dropdown/select variables */
+    --select-bg: rgba(75, 45, 120, 0.8);
+    --select-option-bg: #2a1a4a;
+    --select-option-hover: #3d2b5f;
+    --select-arrow-color: rgba(255, 255, 255, 0.7);
+    
+    /* Model parameter control colors - Purple theme */
+    --slider-track-bg: rgba(255, 255, 255, 0.15);
+    --slider-track-fill: linear-gradient(90deg, #7c3aed, #db2777);
+    --slider-thumb-bg: #a855f7;
+    --slider-thumb-hover: #c084fc;
+    --slider-thumb-active: #e879f9;
+    --parameter-input-bg: rgba(255, 255, 255, 0.12);
+    --parameter-input-border: rgba(255, 255, 255, 0.25);
+}
+
+/* Dark Theme - Now only needs minimal overrides since root is already dark */
+[data-theme="dark"] {
+    /* Since root is already dark, we only need minimal overrides */
+    /* Most variables inherited from :root - this prevents duplication */
+}
+
+/* Light Theme - IMPROVED with better contrast and visibility */
+[data-theme="light"] {
+    /* Background colors - Made more subtle */
+    --bg-primary: linear-gradient(to bottom, #ffffff, #f1f5f9);
+    --bg-secondary: rgba(0, 0, 0, 0.08);
+    --bg-tertiary: rgba(0, 0, 0, 0.04);
+    --bg-accent: rgba(0, 0, 0, 0.12);
+    
+    /* Text colors - IMPROVED contrast */
+    --text-primary: rgba(0, 0, 0, 0.95);
+    --text-secondary: rgba(0, 0, 0, 0.75);  /* Increased from 0.7 */
+    --text-tertiary: rgba(0, 0, 0, 0.65);   /* Increased from 0.5 */
+    --text-muted: rgba(0, 0, 0, 0.55);      /* Increased from 0.4 */
+    
+    /* Border colors - Made more visible */
+    --border-primary: rgba(0, 0, 0, 0.15);  /* Increased from 0.1 */
+    --border-secondary: rgba(0, 0, 0, 0.08); /* Increased from 0.05 */
+    --border-accent: rgba(0, 0, 0, 0.25);   /* Increased from 0.2 */
+    
+    /* Status colors - Made more vibrant for better visibility */
+    --status-success: #047857;  /* Darker green */
+    --status-error: #b91c1c;    /* Darker red */
+    --status-warning: #b45309;  /* Darker orange */
+    --status-info: #1d4ed8;     /* Darker blue */
+    
+    /* Button colors */
+    --btn-primary-bg: linear-gradient(135deg, #2563eb, #7c3aed);
+    --btn-primary-hover: linear-gradient(135deg, #1d4ed8, #6d28d9);
+    --btn-secondary-bg: rgba(0, 0, 0, 0.08);  /* Increased visibility */
+    --btn-secondary-hover: rgba(0, 0, 0, 0.15); /* Increased visibility */
+    
+    /* Input colors - Better contrast */
+    --input-bg: rgba(255, 255, 255, 0.9);    /* More opaque */
+    --input-border: rgba(0, 0, 0, 0.15);     /* More visible */
+    --input-focus: #2563eb;
+    --input-placeholder: rgba(0, 0, 0, 0.5); /* Darker placeholder */
+    
+    /* Audio player colors */
+    --audio-bg: rgba(255, 255, 255, 0.9);
+    --audio-border: rgba(0, 0, 0, 0.15);
+    
+    /* Modal colors */
+    --modal-overlay: rgba(0, 0, 0, 0.4);
+    --modal-bg: rgba(255, 255, 255, 0.98);   /* More opaque */
+    --modal-border: rgba(0, 0, 0, 0.15);     /* More visible */
+    
+    /* Enhanced dropdown/select variables */
+    --select-bg: rgba(255, 255, 255, 0.95);
+    --select-option-bg: #ffffff;
+    --select-option-hover: #e2e8f0;
+    --select-arrow-color: rgba(0, 0, 0, 0.7); /* Darker arrow */
+    
+    /* Model parameter control colors - Light theme */
+    --slider-track-bg: rgba(0, 0, 0, 0.12);
+    --slider-track-fill: linear-gradient(90deg, #2563eb, #7c3aed);
+    --slider-thumb-bg: #4f46e5;
+    --slider-thumb-hover: #3730a3;
+    --slider-thumb-active: #312e81;
+    --parameter-input-bg: rgba(255, 255, 255, 0.95);
+    --parameter-input-border: rgba(0, 0, 0, 0.2);
+}
+
+/* Theme transition animations */
+* {
+    transition: 
+        background var(--transition-duration) var(--transition-timing),
+        background-color var(--transition-duration) var(--transition-timing),
+        color var(--transition-duration) var(--transition-timing),
+        border-color var(--transition-duration) var(--transition-timing),
+        box-shadow var(--transition-duration) var(--transition-timing);
+}
+
+/* Disable transitions during theme loading to prevent flash */
+.theme-loading * {
+    transition: none !important;
+}
+
+/* Settings Modal Specific Styles */
+.settings-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--modal-overlay);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 1rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-duration) var(--transition-timing),
+                visibility var(--transition-duration) var(--transition-timing);
+}
+
+.settings-modal.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.settings-modal-content {
+    background: var(--modal-bg);
+    border: 1px solid var(--modal-border);
+    border-radius: var(--border-radius-lg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    max-width: 600px;
+    width: 100%;
+    max-height: 80vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transform: scale(0.9);
+    transition: transform var(--transition-duration) var(--transition-timing);
+}
+
+.settings-modal.active .settings-modal-content {
+    transform: scale(1);
+}
+
+.settings-modal-header {
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-primary);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.settings-modal-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0;
+}
+
+.settings-modal-close {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: var(--border-radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.settings-modal-close:hover {
+    background: var(--btn-secondary-hover);
+    color: var(--text-primary);
+}
+
+.settings-modal-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.settings-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border-primary);
+    background: var(--bg-tertiary);
+}
+
+.settings-tab {
+    flex: 1;
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: all var(--transition-duration) var(--transition-timing);
+    border-bottom: 2px solid transparent;
+    min-width: 0; /* Allow text to wrap on small screens */
+}
+
+.settings-tab:hover {
+    background: var(--btn-secondary-hover);
+    color: var(--text-primary);
+}
+
+.settings-tab.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--status-info);
+    background: var(--bg-secondary);
+}
+
+.settings-tab-content {
+    padding: 1.5rem;
+    display: none;
+}
+
+.settings-tab-content.active {
+    display: block;
+}
+
+.settings-section {
+    margin-bottom: 2rem;
+}
+
+.settings-section:last-child {
+    margin-bottom: 0;
+}
+
+.settings-section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 1rem 0;
+}
+
+.settings-field {
+    margin-bottom: 1.5rem;
+}
+
+.settings-field:last-child {
+    margin-bottom: 0;
+}
+
+.settings-field-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 0.5rem;
+}
+
+.settings-field-description {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* NEW: Settings Select Styling */
+.settings-select {
+    width: 100%;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-primary);
+    padding: 0.75rem;
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    transition: all var(--transition-duration) var(--transition-timing);
+    
+    /* Enhanced cross-browser styling */
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='rgba(255,255,255,0.7)' d='M6 9L1.5 4.5h9z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 12px;
+    padding-right: 2.5rem;
+}
+
+.settings-select:focus {
+    outline: none;
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+}
+
+.settings-select:hover {
+    border-color: var(--border-accent);
+}
+
+/* Settings select options */
+.settings-select option {
+    background: var(--select-option-bg);
+    color: var(--text-primary);
+    padding: 0.5rem;
+    border: none;
+}
+
+.settings-select option:hover,
+.settings-select option:focus,
+.settings-select option:checked {
+    background: var(--select-option-hover);
+}
+
+/* Light theme arrow for settings selects */
+[data-theme="light"] .settings-select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'><path fill='rgba(0,0,0,0.6)' d='M6 9L1.5 4.5h9z'/></svg>");
+}
+
+/* Light theme options for settings selects */
+[data-theme="light"] .settings-select option {
+    background: rgba(255, 255, 255, 0.95);
+    color: rgba(0, 0, 0, 0.9);
+}
+
+/* Chrome-specific fixes for settings selects */
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+    .settings-select {
+        color: var(--text-primary) !important;
+    }
+    
+    .settings-select option {
+        background: #2a2a2a !important;
+        color: white !important;
+    }
+    
+    [data-theme="light"] .settings-select option {
+        background: #f8f9fa !important;
+        color: #212529 !important;
+    }
+    
+    [data-theme="current"] .settings-select option {
+        background: #2a1a4a !important;
+        color: white !important;
+    }
+}
+
+.theme-selector {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.theme-option {
+    position: relative;
+    cursor: pointer;
+    border-radius: var(--border-radius-md);
+    border: 2px solid var(--border-secondary);
+    overflow: hidden;
+    transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.theme-option:hover {
+    border-color: var(--border-accent);
+}
+
+.theme-option.selected {
+    border-color: var(--status-info);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.theme-option input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-preview {
+    width: 100%;
+    height: 80px;
+    display: flex;
+    flex-direction: column;
+    padding: 0.75rem;
+    gap: 0.5rem;
+}
+
+.theme-preview-header {
+    height: 8px;
+    border-radius: 4px;
+    opacity: 0.8;
+}
+
+.theme-preview-content {
+    height: 20px;
+    border-radius: 4px;
+    opacity: 0.6;
+}
+
+.theme-preview-accent {
+    height: 8px;
+    width: 60%;
+    border-radius: 4px;
+    opacity: 0.9;
+}
+
+.theme-name {
+    text-align: center;
+    padding: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    background: var(--bg-tertiary);
+}
+
+/* Theme preview colors */
+.theme-option[data-theme="current"] .theme-preview {
+    background: linear-gradient(to bottom, #4c1d95, #3b0764);
+}
+
+.theme-option[data-theme="current"] .theme-preview-header {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.theme-option[data-theme="current"] .theme-preview-content {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-option[data-theme="current"] .theme-preview-accent {
+    background: linear-gradient(135deg, #7c3aed, #db2777);
+}
+
+.theme-option[data-theme="dark"] .theme-preview {
+    background: linear-gradient(to bottom, #1a1a1a, #0d0d0d);
+}
+
+.theme-option[data-theme="dark"] .theme-preview-header {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.theme-option[data-theme="dark"] .theme-preview-content {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.theme-option[data-theme="dark"] .theme-preview-accent {
+    background: linear-gradient(135deg, #374151, #4b5563);
+}
+
+.theme-option[data-theme="light"] .theme-preview {
+    background: linear-gradient(to bottom, #f8fafc, #e2e8f0);
+}
+
+.theme-option[data-theme="light"] .theme-preview-header {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.theme-option[data-theme="light"] .theme-preview-content {
+    background: rgba(0, 0, 0, 0.05);
+}
+
+.theme-option[data-theme="light"] .theme-preview-accent {
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+}
+
+/* Model Parameter Slider Styles */
+.parameter-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--slider-track-bg);
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    margin: 0.5rem 0;
+}
+
+.parameter-slider::-webkit-slider-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--slider-track-bg);
+    border: none;
+}
+
+.parameter-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--slider-thumb-bg);
+    cursor: pointer;
+    border: 2px solid var(--bg-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.parameter-slider::-webkit-slider-thumb:hover {
+    background: var(--slider-thumb-hover);
+    transform: scale(1.1);
+}
+
+.parameter-slider::-webkit-slider-thumb:active {
+    background: var(--slider-thumb-active);
+    transform: scale(1.15);
+}
+
+.parameter-slider::-moz-range-track {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--slider-track-bg);
+    border: none;
+}
+
+.parameter-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--slider-thumb-bg);
+    cursor: pointer;
+    border: 2px solid var(--bg-primary);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.parameter-slider::-moz-range-thumb:hover {
+    background: var(--slider-thumb-hover);
+    transform: scale(1.1);
+}
+
+.parameter-slider::-moz-range-thumb:active {
+    background: var(--slider-thumb-active);
+    transform: scale(1.15);
+}
+
+/* Progressive fill effect for sliders */
+.parameter-slider {
+    background-image: linear-gradient(
+        to right,
+        transparent 0%,
+        transparent var(--fill-percent, 0%),
+        var(--slider-track-bg) var(--fill-percent, 0%),
+        var(--slider-track-bg) 100%
+    );
+}
+
+/* Seed Input Styles */
+.seed-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--parameter-input-bg);
+    border: 1px solid var(--parameter-input-border);
+    border-radius: var(--border-radius-sm);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.seed-input::placeholder {
+    color: var(--text-muted);
+}
+
+.seed-input:focus {
+    outline: none;
+    border-color: var(--status-info);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+    background: var(--input-bg);
+}
+
+.seed-input:hover {
+    border-color: var(--border-accent);
+}
+
+/* Enhanced button styles for reset button */
+.btn-secondary {
+    padding: 0.75rem 1.5rem;
+    background: var(--btn-secondary-bg);
+    color: var(--text-secondary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--border-radius-sm);
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-duration) var(--transition-timing);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-secondary:hover {
+    background: var(--btn-secondary-hover);
+    color: var(--text-primary);
+    border-color: var(--border-accent);
+    transform: translateY(-1px);
+}
+
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
+/* Universal select styling using the new variables */
+.control-group select {
+    /* Force consistent appearance */
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    appearance: none !important;
+    
+    /* Use theme-specific variables */
+    background: var(--select-bg, var(--input-bg)) !important;
+    color: var(--text-primary) !important;
+    
+    /* Custom dropdown arrow using theme color */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba(255,255,255,0.7)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
+    padding-right: 2.5rem !important;
+}
+
+/* Light theme arrow color */
+[data-theme="light"] .control-group select {
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='rgba(0,0,0,0.6)' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+}
+
+/* Force option styling using theme variables */
+.control-group select option {
+    background: var(--select-option-bg) !important;
+    color: var(--text-primary) !important;
+    padding: 8px 12px !important;
+    border: none !important;
+}
+
+.control-group select option:hover,
+.control-group select option:focus,
+.control-group select option:checked {
+    background: var(--select-option-hover) !important;
+}
+
+/* Chrome/Webkit specific overrides */
+@supports (-webkit-appearance: none) {
+    .control-group select option {
+        background-color: var(--select-option-bg) !important;
+        color: var(--text-primary) !important;
+    }
+}
+
+/* LIGHT THEME SPECIFIC FIXES for better visibility */
+
+/* Light theme specific overrides for better visibility */
+[data-theme="light"] .header p {
+    color: rgba(0, 0, 0, 0.7) !important; /* Make subtitle more visible */
+    font-weight: 500; /* Add some weight */
+}
+
+[data-theme="light"] .performance-metrics {
+    background: rgba(0, 0, 0, 0.06) !important; /* Slightly darker background */
+    color: rgba(0, 0, 0, 0.8) !important; /* Darker text */
+    border: 1px solid rgba(0, 0, 0, 0.1); /* Add subtle border */
+}
+
+[data-theme="light"] .status-message {
+    border-width: 1px;
+    font-weight: 500; /* Make status text bolder */
+}
+
+[data-theme="light"] .status-message.info {
+    background: rgba(29, 78, 216, 0.15) !important; /* Darker blue background */
+    color: #1d4ed8 !important; /* Darker blue text */
+    border-color: rgba(29, 78, 216, 0.3) !important;
+}
+
+[data-theme="light"] .status-message.success {
+    background: rgba(4, 120, 87, 0.15) !important; /* Darker green background */
+    color: #047857 !important; /* Darker green text */
+    border-color: rgba(4, 120, 87, 0.3) !important;
+}
+
+[data-theme="light"] .status-message.error {
+    background: rgba(185, 28, 28, 0.15) !important; /* Darker red background */
+    color: #b91c1c !important; /* Darker red text */
+    border-color: rgba(185, 28, 28, 0.3) !important;
+}
+
+/* Light theme container improvements */
+[data-theme="light"] .container {
+    background: rgba(255, 255, 255, 0.85) !important; /* More opaque */
+    border: 1px solid rgba(0, 0, 0, 0.12) !important; /* Visible border */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15) !important; /* Stronger shadow */
+}
+
+/* Light theme exchange boxes */
+[data-theme="light"] .exchange {
+    background: rgba(0, 0, 0, 0.04) !important; /* Slightly more visible */
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+}
+
+[data-theme="light"] .exchange-label {
+    color: rgba(0, 0, 0, 0.8) !important; /* Darker labels */
+    font-weight: 600; /* Make labels bolder */
+}
+
+/* Light theme status indicators */
+[data-theme="light"] .status-indicator {
+    background: rgba(0, 0, 0, 0.06) !important;
+    border: 1px solid rgba(0, 0, 0, 0.12) !important;
+    color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Light theme turn count */
+[data-theme="light"] .turn-count {
+    background: rgba(0, 0, 0, 0.08) !important;
+    color: rgba(0, 0, 0, 0.8) !important;
+}
+
+/* Light theme conversation title */
+[data-theme="light"] .conversation-title {
+    color: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Light theme input improvements */
+[data-theme="light"] .main-input {
+    background: rgba(255, 255, 255, 0.95) !important;
+    border: 2px solid rgba(0, 0, 0, 0.15) !important;
+    color: rgba(0, 0, 0, 0.95) !important;
+}
+
+[data-theme="light"] .main-input::placeholder {
+    color: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* Light theme button improvements */
+[data-theme="light"] .clear-button,
+[data-theme="light"] .settings-button {
+    background: rgba(0, 0, 0, 0.08) !important;
+    border: 1px solid rgba(0, 0, 0, 0.15) !important;
+    color: rgba(0, 0, 0, 0.8) !important;
+}
+
+[data-theme="light"] .clear-button:hover,
+[data-theme="light"] .settings-button:hover {
+    background: rgba(0, 0, 0, 0.15) !important;
+    color: rgba(0, 0, 0, 0.95) !important;
+}
+
+/* Mobile responsiveness */
+@media (max-width: 768px) {
+    .settings-modal {
+        padding: 0.5rem;
+    }
+    
+    .settings-modal-content {
+        max-height: 90vh;
+    }
+    
+    .settings-modal-header {
+        padding: 1rem;
+    }
+    
+    .settings-tab-content {
+        padding: 1rem;
+    }
+    
+    .theme-selector {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .settings-tabs {
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .settings-tabs::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .settings-tab {
+        white-space: nowrap;
+        min-width: auto;
+        padding: 0.75rem 1rem;
+        font-size: 0.8rem;
+    }
+}
+
+/* Focus styles for accessibility */
+.settings-modal-close:focus,
+.settings-tab:focus,
+.theme-option:focus-within,
+.parameter-slider:focus,
+.seed-input:focus,
+.btn-secondary:focus,
+.settings-select:focus {
+    outline: 2px solid var(--status-info);
+    outline-offset: 2px;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        transition: none !important;
+    }
+    
+    .settings-modal,
+    .settings-modal-content,
+    .parameter-slider,
+    .btn-secondary,
+    .settings-select {
+        transition: none !important;
+    }
+    
+    .parameter-slider::-webkit-slider-thumb,
+    .parameter-slider::-moz-range-thumb {
+        transition: none !important;
+    }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .parameter-slider,
+    .settings-select {
+        border: 1px solid var(--text-primary);
+    }
+    
+    .parameter-slider::-webkit-slider-thumb {
+        border: 2px solid var(--text-primary);
+    }
+    
+    .seed-input {
+        border: 2px solid var(--text-primary);
+    }
+}
+
+/* Fix theme name visibility issues - specific overrides only */
+[data-theme="dark"] .theme-option[data-theme="light"] .theme-name {
+    color: rgba(0, 0, 0, 0.9) !important;
+    background: rgba(255, 255, 255, 0.95) !important;
+}
+
+[data-theme="light"] .theme-option[data-theme="current"] .theme-name {
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: rgba(75, 45, 120, 0.9) !important;
+}

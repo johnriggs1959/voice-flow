@@ -1,0 +1,11 @@
+<artifact identifier="gitignore-file" type="application/vnd.ant.code" language="text" title=".gitignore">
+# SSL Certificates (security)
+certs/
+*.pem
+*.key
+*.crt
+
+*.backup
+*.backup2
+*.bak
+*.old

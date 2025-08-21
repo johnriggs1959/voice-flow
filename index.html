@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Assistant with Voice</title>
+    
+    <!-- CRITICAL: Theme detection BEFORE any CSS loads to prevent FOUC -->
+    <script>
+    (function() {
+        console.log('=== THEME DETECTION START ===');
+        
+        // Check what's in localStorage RIGHT NOW
+        console.log('localStorage keys at start:', Object.keys(localStorage));
+        console.log('ai-assistant-theme at start:', localStorage.getItem('ai-assistant-theme'));
+        
+        // Immediate theme detection to prevent purple flash
+        let theme = 'dark'; // Default fallback
+        
+    try {
+        const saved = localStorage.getItem('ai-assistant-theme');
+        console.log('Saved theme from localStorage:', saved);
+
+        // Accept any non-empty string as a theme
+        if (saved && typeof saved === 'string' && saved.trim().length > 0) {
+            theme = saved.trim();
+            console.log('Using saved theme:', theme);
+        } else {
+            // No saved preference, detect system preference
+            console.log('No saved theme, detecting system preference');
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                theme = 'light';
+            } else {
+                theme = 'dark';
+            }
+        }
+    } catch (e) {
+        console.warn('Could not access localStorage for theme preference:', e);
+    }
+
+    document.documentElement.setAttribute('data-theme', theme);
+    window.__INITIAL_THEME__ = theme;
+    console.log('Applied theme:', theme);
+    console.log('=== THEME DETECTION END ===');    
+
+    })();
+    </script>
+    
+    <!-- CSS loads AFTER theme is set -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/styles.css">
+    <!-- Theme system CSS -->
+    <link rel="stylesheet" href="themes/themes.css">
+    <link rel="stylesheet" href="css/logging-styles.css">
+</head>
+<body>
+    <div class="container" style="max-height: 96vh; min-height: 92vh; margin: 2vh auto;">
+        <!-- UPDATED: New bordered header container with proper layout -->
+        <div class="header-container">
+            <!-- Empty left spacer for balance -->
+            <div class="header-spacer"></div>
+            
+            <!-- Centered service status indicators -->
+            <div class="service-status">
+                <div class="status-indicator">
+                    <div id="llm-dot" class="status-dot checking"></div>
+                    LLM
+                </div>
+                <div class="status-indicator">
+                    <div id="tts-dot" class="status-dot checking"></div>
+                    TTS
+                </div>
+                <div class="status-indicator">
+                    <div id="stt-dot" class="status-dot checking"></div>
+                    STT
+                </div>
+            </div>
+            
+            <!-- Settings button on right -->
+            <button id="settingsButton" class="settings-button" title="Open Settings" aria-label="Open Settings">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,15.5A3.5,3.5 0 0,1 8.5,12A3.5,3.5 0 0,1 12,8.5A3.5,3.5 0 0,1 15.5,12A3.5,3.5 0 0,1 12,15.5M19.43,12.97C19.47,12.65 19.5,12.33 19.5,12C19.5,11.67 19.47,11.34 19.43,11.03L21.54,9.37C21.73,9.22 21.78,8.95 21.66,8.73L19.66,5.27C19.54,5.05 19.27,4.96 19.05,5.05L16.56,6.05C16.04,5.66 15.5,5.32 14.87,5.07L14.5,2.42C14.46,2.18 14.25,2 14,2H10C9.75,2 9.54,2.18 9.5,2.42L9.13,5.07C8.5,5.32 7.96,5.66 7.44,6.05L4.95,5.05C4.73,4.96 4.46,5.05 4.34,5.27L2.34,8.73C2.22,8.95 2.27,9.22 2.46,9.37L4.57,11.03C4.53,11.34 4.5,11.67 4.5,12C4.5,12.33 4.53,12.65 4.57,12.97L2.46,14.63C2.27,14.78 2.22,15.05 2.34,15.27L4.34,18.73C4.46,18.95 4.73,19.03 4.95,18.95L7.44,17.94C7.96,18.34 8.5,18.68 9.13,18.93L9.5,21.58C9.54,21.82 9.75,22 10,22H14C14.25,22 14.46,21.82 14.5,21.58L14.87,18.93C15.5,18.68 16.04,18.34 16.56,17.94L19.05,18.95C19.27,19.03 19.54,18.95 19.66,18.73L21.66,15.27C21.78,15.05 21.73,14.78 21.54,14.63L19.43,12.97Z"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- REMOVED: Old header and service-status sections (now consolidated above) -->
+        
+        <!-- HIDDEN: Keep the model select for compatibility but hide it -->
+        <div style="display: none;">
+            <select id="modelSelect">
+                <option>Loading models...</option>
+            </select>
+            
+            <select id="sttModelSelect">
+                <option value="tiny">Tiny (Fastest, Lower Accuracy)</option>
+                <option value="base" selected>Base (Balanced Speed & Accuracy)</option>
+                <option value="small">Small (Good Accuracy)</option>
+                <option value="medium">Medium (Better Accuracy)</option>
+                <option value="large">Large (Best Accuracy, Slower)</option>
+            </select>
+            
+            <select id="voiceSelect">
+                <option value="af_heart" selected>Heart (Female, American)</option>
+                <option value="af_bella">Bella (Female, American)</option>
+                <option value="af_sarah">Sarah (Female, American)</option>
+                <option value="am_adam">Adam (Male, American)</option>
+                <option value="af_alloy">Alloy (Female, American)</option>
+                <option value="af_aoede">Aoede (Female, American)</option>
+                <option value="bf_alice">Alice (Female, British)</option>
+                <option value="bf_emma">Emma (Female, British)</option>
+                <option value="bf_lily">Lily (Female, British)</option>
+                <option value="bm_daniel">Daniel (Male, British)</option>
+                <option value="bm_fable">Fable (Male, British)</option>
+                <option value="bm_george">George (Male, British)</option>
+                <option value="bm_lewis">Lewis (Male, British)</option>
+            </select>
+        </div>
+
+        <!-- NEW: Chat-style conversation container -->
+        <div class="conversation-container">
+            <div class="conversation-header">
+                <div class="conversation-title">Conversation</div>
+                <div class="turn-count" id="turnCount">0 turns</div>
+                <button id="clearButton" class="clear-button">Clear</button>
+            </div>
+            <div class="conversation-messages" id="conversationMessages">
+                <!-- Messages will be dynamically added here -->
+                <div class="conversation-empty" id="conversationEmpty">
+                    <div class="empty-icon">💬</div>
+                    <div class="empty-text">Start a conversation by typing a message or using voice input below</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KEPT: Input container in same position -->
+        <div class="input-container" style="margin-bottom: 0.5rem;">
+            <textarea 
+                id="questionInput" 
+                class="main-input" 
+                maxlength="500" 
+                placeholder="Enter message or use voice..."
+                rows="1"
+                style="resize: none; overflow: hidden;"></textarea>
+            <div id="micButton" class="mic-button" title="Click to record voice">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                </svg>
+            </div>
+        </div>
+        <div class="char-counter" style="margin-top: 0.25rem; margin-bottom: 0.25rem;">0/500 characters</div>
+
+        <!-- Performance metrics stay at the bottom -->
+        <div class="performance-metrics">
+            <span id="sttTime">STT: --s</span>
+            <span id="llmTime">LLM: --s</span>
+            <span id="ttsTime">TTS: --s</span>
+            <span id="totalTime">Total: --s</span>
+        </div>
+
+        <!-- UPDATED: Enhanced status message with better mobile support -->
+        <div class="status-message" id="statusMessage"></div>
+
+        <!-- HIDDEN: Keep old elements for compatibility during transition -->
+        <div style="display: none;">
+            <div id="questionDisplay"></div>
+            <div id="responseDisplay"></div>
+            <div id="audioPlayer">
+                <audio id="audioElement" controls></audio>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auto-resize textarea script -->
+    <script>
+        // Auto-resize textarea functionality
+        function autoResizeTextarea() {
+            const textarea = document.getElementById('questionInput');
+            if (!textarea) return;
+
+            function adjustHeight() {
+                // Reset height to auto to get the correct scrollHeight
+                textarea.style.height = 'auto';
+                
+                // Set height based on content, with min/max constraints
+                const newHeight = Math.min(Math.max(textarea.scrollHeight, 40), 150); // Min 40px, Max 150px
+                textarea.style.height = newHeight + 'px';
+            }
+
+            // Adjust height on input
+            textarea.addEventListener('input', adjustHeight);
+            
+            // Adjust height on paste
+            textarea.addEventListener('paste', function() {
+                setTimeout(adjustHeight, 10);
+            });
+
+            // FIXED: Simple approach - listen for value changes via polling
+            let lastValue = textarea.value;
+            function checkForChanges() {
+                if (textarea.value !== lastValue) {
+                    lastValue = textarea.value;
+                    adjustHeight();
+                }
+            }
+
+            // Check for changes every 100ms (lightweight polling)
+            setInterval(checkForChanges, 100);
+
+            // Initial adjustment
+            adjustHeight();
+
+            // Expose adjustHeight globally for manual calls
+            window.resizeTextarea = adjustHeight;
+        }
+
+        // Initialize when DOM is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', autoResizeTextarea);
+        } else {
+            autoResizeTextarea();
+        }
+    </script>
+
+    <!-- Load main application module -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
