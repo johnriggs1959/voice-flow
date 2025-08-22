@@ -1,0 +1,557 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voice Flow Configuration</title>
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --bg-dark: #1e293b;
+            --bg-light: #334155;
+            --text: #f1f5f9;
+            --success: #10b981;
+            --error: #ef4444;
+            --border: #475569;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 2rem;
+        }
+
+        .mode-selector {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .mode-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            padding: 20px;
+            background: var(--bg-light);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text);
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-2px);
+            border-color: var(--primary);
+        }
+
+        .mode-btn.active {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+
+        .mode-btn h3 {
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+
+        .mode-btn p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .config-section {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .config-section h2 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .service-config {
+            margin-bottom: 25px;
+        }
+
+        .service-config label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px;
+            background: var(--bg-light);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 1rem;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .btn-test {
+            background: var(--bg-light);
+        }
+
+        .btn-test:hover {
+            background: #475569;
+        }
+
+        .status {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .status.success {
+            background: rgba(16, 185, 129, 0.2);
+            border: 1px solid var(--success);
+            color: var(--success);
+        }
+
+        .status.error {
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid var(--error);
+            color: var(--error);
+        }
+
+        .instructions {
+            background: var(--bg-dark);
+            border-radius: 12px;
+            padding: 30px;
+            border: 1px solid var(--border);
+        }
+
+        .instructions h2 {
+            margin-bottom: 20px;
+            font-size: 1.3rem;
+        }
+
+        .instructions h3 {
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+
+        .code-block {
+            background: #0f172a;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            overflow-x: auto;
+            border: 1px solid var(--border);
+        }
+
+        .code-block code {
+            color: #64ffda;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        @media (max-width: 640px) {
+            .mode-buttons {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎙️ Voice Flow Configuration</h1>
+
+        <!-- Mode Selection -->
+        <div class="mode-selector">
+            <div class="mode-buttons">
+                <button class="mode-btn active" onclick="selectMode('http')">
+                    <h3>HTTP Mode</h3>
+                    <p>Local development with Python</p>
+                </button>
+                <button class="mode-btn" onclick="selectMode('https')">
+                    <h3>HTTPS Mode</h3>
+                    <p>Secure with Nginx proxy</p>
+                </button>
+            </div>
+            <p style="margin-top: 10px; opacity: 0.7;">
+                Current protocol: <strong id="current-protocol">detecting...</strong>
+            </p>
+        </div>
+
+        <!-- Service Configuration -->
+        <div class="config-section">
+            <h2>Service URLs</h2>
+            
+            <div class="service-config">
+                <label>Ollama (LLM Service)</label>
+                <div class="input-group">
+                    <input type="text" id="ollama-url" placeholder="http://localhost:11434">
+                    <button class="btn btn-test" onclick="testService('ollama')">Test</button>
+                </div>
+                <div id="ollama-status"></div>
+            </div>
+
+            <div class="service-config">
+                <label>TTS Service</label>
+                <div class="input-group">
+                    <input type="text" id="tts-url" placeholder="http://localhost:8880">
+                    <button class="btn btn-test" onclick="testService('tts')">Test</button>
+                </div>
+                <div id="tts-status"></div>
+            </div>
+
+            <div class="service-config">
+                <label>STT Service (Whisper)</label>
+                <div class="input-group">
+                    <input type="text" id="stt-url" placeholder="http://localhost:8000">
+                    <button class="btn btn-test" onclick="testService('stt')">Test</button>
+                </div>
+                <div id="stt-status"></div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn" onclick="saveConfiguration()">Save Configuration</button>
+                <button class="btn btn-test" onclick="resetToDefaults()">Reset to Defaults</button>
+            </div>
+        </div>
+
+        <!-- Setup Instructions -->
+        <div class="instructions" id="instructions">
+            <h2>Setup Instructions</h2>
+            <div id="mode-instructions"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'http';
+        
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', () => {
+            detectProtocol();
+            loadConfiguration();
+            updateInstructions();
+            testAllServices();
+        });
+
+        // Detect current protocol
+        function detectProtocol() {
+            const protocol = window.location.protocol;
+            document.getElementById('current-protocol').textContent = protocol;
+            
+            // Auto-select mode based on protocol
+            if (protocol === 'https:') {
+                selectMode('https');
+            } else {
+                selectMode('http');
+            }
+        }
+
+        // Select mode
+        function selectMode(mode) {
+            currentMode = mode;
+            
+            // Update button styles
+            document.querySelectorAll('.mode-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event?.target?.closest('.mode-btn')?.classList.add('active');
+            
+            // Update URLs based on mode
+            if (mode === 'https') {
+                document.getElementById('ollama-url').value = 'https://localhost/ollama';
+                document.getElementById('tts-url').value = 'https://localhost/tts';
+                document.getElementById('stt-url').value = 'https://localhost/stt';
+            } else {
+                document.getElementById('ollama-url').value = 'http://localhost:11434';
+                document.getElementById('tts-url').value = 'http://localhost:8880';
+                document.getElementById('stt-url').value = 'http://localhost:8000';
+            }
+            
+            updateInstructions();
+        }
+
+        // Update instructions based on mode
+        function updateInstructions() {
+            const instructionsDiv = document.getElementById('mode-instructions');
+            
+            if (currentMode === 'https') {
+                instructionsDiv.innerHTML = `
+                    <h3>Nginx HTTPS Setup</h3>
+                    
+                    <p><strong>Step 1:</strong> Install Nginx</p>
+                    <div class="code-block">
+                        <code># Ubuntu/Debian
+sudo apt install nginx
+
+# macOS
+brew install nginx</code>
+                    </div>
+
+                    <p><strong>Step 2:</strong> Generate SSL Certificate</p>
+                    <div class="code-block">
+                        <code># Generate self-signed certificate
+openssl req -x509 -nodes -days 365 -newkey rsa:2048 \\
+  -keyout /tmp/localhost.key \\
+  -out /tmp/localhost.crt \\
+  -subj "/CN=localhost"</code>
+                    </div>
+
+                    <p><strong>Step 3:</strong> Configure Nginx</p>
+                    <p>Create file: <code>/etc/nginx/sites-available/voice-flow</code></p>
+                    <div class="code-block">
+                        <code>server {
+    listen 443 ssl http2;
+    server_name localhost;
+    
+    ssl_certificate /tmp/localhost.crt;
+    ssl_certificate_key /tmp/localhost.key;
+    
+    # Ollama proxy
+    location /ollama/ {
+        proxy_pass http://localhost:11434/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_buffering off;
+    }
+    
+    # TTS proxy
+    location /tts/ {
+        proxy_pass http://localhost:8880/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_buffering off;
+    }
+    
+    # STT proxy
+    location /stt/ {
+        proxy_pass http://localhost:8000/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_buffering off;
+    }
+    
+    # Voice Flow app
+    location / {
+        root /path/to/voice-flow;
+        try_files $uri $uri/ /index.html;
+    }
+}</code>
+                    </div>
+
+                    <p><strong>Step 4:</strong> Enable and Start</p>
+                    <div class="code-block">
+                        <code># Enable the site
+sudo ln -s /etc/nginx/sites-available/voice-flow /etc/nginx/sites-enabled/
+
+# Test configuration
+sudo nginx -t
+
+# Restart Nginx
+sudo systemctl restart nginx
+
+# Access the app
+# https://localhost</code>
+                    </div>
+                `;
+            } else {
+                instructionsDiv.innerHTML = `
+                    <h3>HTTP Setup (Development)</h3>
+                    
+                    <p><strong>Step 1:</strong> Start AI Services</p>
+                    <div class="code-block">
+                        <code># Start Ollama
+ollama serve
+
+# Start TTS (in new terminal)
+cd Kokoro-FastAPI
+docker-compose up
+
+# Start STT (in new terminal)
+docker run -p 8000:8000 onerahmet/openai-whisper-asr-webservice</code>
+                    </div>
+
+                    <p><strong>Step 2:</strong> Start Voice Flow</p>
+                    <div class="code-block">
+                        <code># Navigate to Voice Flow directory
+cd voice-flow
+
+# Start Python server
+python3 -m http.server 8020
+
+# Access the app
+# http://localhost:8020</code>
+                    </div>
+
+                    <p><strong>That's it!</strong> The app will automatically connect to your local services.</p>
+                `;
+            }
+        }
+
+        // Load saved configuration
+        function loadConfiguration() {
+            const saved = localStorage.getItem('voiceFlowConfig');
+            if (saved) {
+                try {
+                    const config = JSON.parse(saved);
+                    if (config.services) {
+                        document.getElementById('ollama-url').value = config.services.ollama || '';
+                        document.getElementById('tts-url').value = config.services.tts || '';
+                        document.getElementById('stt-url').value = config.services.stt || '';
+                    }
+                } catch (e) {
+                    console.error('Failed to load configuration:', e);
+                }
+            }
+        }
+
+        // Save configuration
+        function saveConfiguration() {
+            const config = {
+                protocol: window.location.protocol.replace(':', ''),
+                services: {
+                    ollama: document.getElementById('ollama-url').value,
+                    tts: document.getElementById('tts-url').value,
+                    stt: document.getElementById('stt-url').value
+                },
+                proxy: {
+                    enabled: currentMode === 'https',
+                    url: currentMode === 'https' ? 'https://localhost' : null
+                }
+            };
+            
+            localStorage.setItem('voiceFlowConfig', JSON.stringify(config));
+            
+            // Notify parent window if embedded
+            if (window.parent !== window) {
+                window.parent.postMessage({
+                    type: 'configUpdate',
+                    config: config
+                }, '*');
+            }
+            
+            // Show success message
+            showStatus('Configuration saved successfully!', 'success');
+            
+            // Test all services after saving
+            setTimeout(() => testAllServices(), 500);
+        }
+
+        // Reset to defaults
+        function resetToDefaults() {
+            selectMode(window.location.protocol === 'https:' ? 'https' : 'http');
+            showStatus('Reset to default configuration', 'success');
+        }
+
+        // Test service connectivity
+        async function testService(service) {
+            const urls = {
+                ollama: document.getElementById('ollama-url').value,
+                tts: document.getElementById('tts-url').value,
+                stt: document.getElementById('stt-url').value
+            };
+            
+            const endpoints = {
+                ollama: '/api/tags',
+                tts: '/v1/test',
+                stt: '/v1/test'  // Changed from /openapi.json to /v1/test
+            };
+            
+            const statusDiv = document.getElementById(`${service}-status`);
+            statusDiv.innerHTML = '<div class="status">Testing...</div>';
+            
+            try {
+                const response = await fetch(urls[service] + endpoints[service], {
+                    method: 'GET',
+                    mode: 'cors',
+                    signal: AbortSignal.timeout(5000)
+                });
+                
+                if (response.ok || response.status === 404) {
+                    statusDiv.innerHTML = '<div class="status success">✅ Service is accessible</div>';
+                    return true;
+                } else {
+                    throw new Error(`Status: ${response.status}`);
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">❌ Service unreachable</div>`;
+                return false;
+            }
+        }
+
+        // Test all services
+        async function testAllServices() {
+            await testService('ollama');
+            await testService('tts');
+            await testService('stt');
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            // You can implement a toast notification here if desired
+            console.log(`[${type}] ${message}`);
+        }
+    </script>
+</body>
+</html>

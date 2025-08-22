@@ -1,3 +1,7 @@
+// js/services/api-service.js
+// Enhanced version with HTTPS configuration support
+// Preserves all existing functionality while adding dynamic configuration
+
 import { CONFIG } from '../config.js';
 import { retryWithBackoff } from '../utils/helpers.js';
 
@@ -16,11 +20,79 @@ export class ApiService {
     static maxCacheSize = 50;
     static cacheTimeout = 5 * 60 * 1000; // 5 minutes
     
-    // NEW: Dynamic URL getters that work at runtime
+    // NEW: Configuration management
+    static customConfig = null;
+    static configListenerInitialized = false;
+    
+    // Initialize configuration listener (call once on app start)
+    static initConfigListener() {
+        if (this.configListenerInitialized) return;
+        
+        // Load saved configuration
+        const saved = localStorage.getItem('voiceFlowConfig');
+        if (saved) {
+            try {
+                this.customConfig = JSON.parse(saved);
+                console.log('Loaded custom configuration:', this.customConfig);
+            } catch (e) {
+                console.warn('Invalid saved configuration, using defaults');
+            }
+        }
+        
+        // Listen for configuration updates from config UI
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'configUpdate') {
+                this.customConfig = event.data.config;
+                localStorage.setItem('voiceFlowConfig', JSON.stringify(this.customConfig));
+                console.log('Configuration updated:', this.customConfig);
+                
+                // Clear cache when config changes
+                this.clearCache();
+                
+                // Emit configuration change event
+                window.dispatchEvent(new CustomEvent('configChanged', {
+                    detail: this.customConfig
+                }));
+            }
+        });
+        
+        // Listen for storage events (cross-tab updates)
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'voiceFlowConfig' && event.newValue) {
+                try {
+                    this.customConfig = JSON.parse(event.newValue);
+                    this.clearCache();
+                    console.log('Configuration updated from another tab');
+                } catch (e) {
+                    console.warn('Invalid configuration from storage');
+                }
+            }
+        });
+        
+        this.configListenerInitialized = true;
+    }
+    
+    // ENHANCED: Dynamic URL getters with configuration override support
     static getOllamaUrl() {
+        // Check for custom configuration first
+        if (this.customConfig && this.customConfig.services && this.customConfig.services.ollama) {
+            return this.customConfig.services.ollama;
+        }
+        
         const currentHost = window.location.hostname;
         const protocol = window.location.protocol;
         
+        // Check if we're on HTTPS and need to use proxy
+        if (protocol === 'https:') {
+            // Check for proxy configuration
+            if (this.customConfig && this.customConfig.proxy && this.customConfig.proxy.enabled) {
+                return `${this.customConfig.proxy.url}/ollama`;
+            }
+            // Default HTTPS proxy path
+            return `${protocol}//${currentHost}/ollama`;
+        }
+        
+        // Original HTTP logic
         if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             return `${protocol}//localhost:11434`;
         }
@@ -28,9 +100,25 @@ export class ApiService {
     }
     
     static getTTSUrl() {
+        // Check for custom configuration first
+        if (this.customConfig && this.customConfig.services && this.customConfig.services.tts) {
+            return this.customConfig.services.tts;
+        }
+        
         const currentHost = window.location.hostname;
         const protocol = window.location.protocol;
         
+        // Check if we're on HTTPS and need to use proxy
+        if (protocol === 'https:') {
+            // Check for proxy configuration
+            if (this.customConfig && this.customConfig.proxy && this.customConfig.proxy.enabled) {
+                return `${this.customConfig.proxy.url}/tts`;
+            }
+            // Default HTTPS proxy path
+            return `${protocol}//${currentHost}/tts`;
+        }
+        
+        // Original HTTP logic
         if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             return `${protocol}//localhost:8880`;
         }
@@ -38,13 +126,130 @@ export class ApiService {
     }
     
     static getWhisperUrl() {
+        // Check for custom configuration first
+        if (this.customConfig && this.customConfig.services && this.customConfig.services.stt) {
+            return this.customConfig.services.stt;
+        }
+        
         const currentHost = window.location.hostname;
         const protocol = window.location.protocol;
         
+        // Check if we're on HTTPS and need to use proxy
+        if (protocol === 'https:') {
+            // Check for proxy configuration
+            if (this.customConfig && this.customConfig.proxy && this.customConfig.proxy.enabled) {
+                return `${this.customConfig.proxy.url}/stt`;
+            }
+            // Default HTTPS proxy path
+            return `${protocol}//${currentHost}/stt`;
+        }
+        
+        // Original HTTP logic
         if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
             return `${protocol}//localhost:8000`;
         }
         return `${protocol}//${currentHost}:8000`;
+    }
+    
+    // NEW: Get all service URLs for status display
+    static getServiceUrls() {
+        return {
+            ollama: this.getOllamaUrl(),
+            tts: this.getTTSUrl(),
+            stt: this.getWhisperUrl()
+        };
+    }
+    
+    // NEW: Update service URL dynamically
+    static updateServiceUrl(service, url) {
+        if (!this.customConfig) {
+            this.customConfig = {
+                services: {},
+                proxy: { enabled: false }
+            };
+        }
+        
+        if (!this.customConfig.services) {
+            this.customConfig.services = {};
+        }
+        
+        this.customConfig.services[service] = url;
+        localStorage.setItem('voiceFlowConfig', JSON.stringify(this.customConfig));
+        this.clearCache();
+        
+        console.log(`Updated ${service} URL to: ${url}`);
+        
+        // Emit event for UI updates
+        window.dispatchEvent(new CustomEvent('serviceUrlChanged', {
+            detail: { service, url }
+        }));
+    }
+    
+    // NEW: Enable/disable proxy mode
+    static setProxyMode(enabled, proxyUrl = null) {
+        if (!this.customConfig) {
+            this.customConfig = {
+                services: {},
+                proxy: {}
+            };
+        }
+        
+        this.customConfig.proxy.enabled = enabled;
+        if (proxyUrl) {
+            this.customConfig.proxy.url = proxyUrl;
+        }
+        
+        localStorage.setItem('voiceFlowConfig', JSON.stringify(this.customConfig));
+        this.clearCache();
+        
+        console.log(`Proxy mode ${enabled ? 'enabled' : 'disabled'}`);
+    }
+    
+    // NEW: Get configuration status
+    static getConfigStatus() {
+        return {
+            hasCustomConfig: !!this.customConfig,
+            protocol: window.location.protocol,
+            isHttps: window.location.protocol === 'https:',
+            proxyEnabled: this.customConfig?.proxy?.enabled || false,
+            serviceUrls: this.getServiceUrls(),
+            customConfig: this.customConfig
+        };
+    }
+    
+    // NEW: Check service with fallback URLs
+    static async checkServiceWithFallback(service, primaryUrl, fallbackUrls = []) {
+        // Try primary URL first
+        try {
+            const endpoint = service === 'ollama' ? '/api/tags' : 
+                           service === 'tts' ? '/v1/test' : 
+                           '/openapi.json';
+            
+            await this.makeSilentRequest(`${primaryUrl}${endpoint}`, {}, true, 5000);
+            return { success: true, url: primaryUrl };
+        } catch (error) {
+            console.log(`Primary ${service} URL failed, trying fallbacks...`);
+        }
+        
+        // Try fallback URLs
+        for (const fallbackUrl of fallbackUrls) {
+            try {
+                const endpoint = service === 'ollama' ? '/api/tags' : 
+                               service === 'tts' ? '/v1/test' : 
+                               '/openapi.json';
+                
+                await this.makeSilentRequest(`${fallbackUrl}${endpoint}`, {}, true, 5000);
+                
+                // Update configuration with working URL
+                this.updateServiceUrl(service, fallbackUrl);
+                
+                return { success: true, url: fallbackUrl };
+            } catch (error) {
+                continue;
+            }
+        }
+        
+        return { success: false, url: null };
     }
     
     // Generate unique request ID
@@ -379,73 +584,89 @@ export class ApiService {
         this.isProcessingQueue = false;
     }
     
-    // UPDATED: Check Ollama status with dynamic URL
+    // ENHANCED: Check Ollama status with fallback
     static async checkOllamaStatus() {
-        try {
-            await this.makeRequest(`${this.getOllamaUrl()}/api/tags`, {}, true, 5000);
-            return true;
-        } catch (error) {
-            console.error('Ollama status check failed:', error.message);
-            return false;
+        const primaryUrl = this.getOllamaUrl();
+        const fallbackUrls = [
+            'http://localhost:11434',
+            'http://127.0.0.1:11434',
+            'https://localhost/ollama',
+            `${window.location.protocol}//localhost:11434`
+        ].filter(url => url !== primaryUrl);
+        
+        const result = await this.checkServiceWithFallback('ollama', primaryUrl, fallbackUrls);
+        
+        if (!result.success) {
+            console.error('Ollama status check failed on all URLs');
         }
+        
+        return result.success;
     }
     
-    // UPDATED: Check TTS status with dynamic URL
+    // ENHANCED: Check TTS status with fallback
     static async checkTTSStatus() {
-        try {
-            // Try multiple possible endpoints for TTS service
-            const baseUrl = this.getTTSUrl();
-            const endpoints = [
-                `${baseUrl}/health`,
-                `${baseUrl}/v1/test`,
-                `${baseUrl}`
-            ];
-            
-            for (const endpoint of endpoints) {
-                try {
-                    await this.makeRequest(endpoint, {}, true, 5000);
-                    return true;
-                } catch (error) {
-                    // Continue to next endpoint
-                    continue;
-                }
+        const primaryUrl = this.getTTSUrl();
+        const fallbackUrls = [
+            'http://localhost:8880',
+            'http://127.0.0.1:8880',
+            'https://localhost/tts',
+            `${window.location.protocol}//localhost:8880`
+        ].filter(url => url !== primaryUrl);
+        
+        // Try multiple endpoints for each URL
+        const baseUrl = primaryUrl;
+        const endpoints = [
+            `${baseUrl}/health`,
+            `${baseUrl}/v1/test`,
+            `${baseUrl}`
+        ];
+        
+        for (const endpoint of endpoints) {
+            try {
+                await this.makeSilentRequest(endpoint, {}, true, 5000);
+                return true;
+            } catch (error) {
+                continue;
             }
-            return false;
-        } catch (error) {
-            console.error('TTS status check failed:', error.message);
-            return false;
         }
+        
+        // Try fallbacks
+        const result = await this.checkServiceWithFallback('tts', primaryUrl, fallbackUrls);
+        return result.success;
     }
     
-    // UPDATED: Check STT status with dynamic URL
+    // ENHANCED: Check STT status with fallback
     static async checkSTTStatus() {
-        try {
-            // Try the most common endpoints silently
-            const baseUrl = this.getWhisperUrl();
-            const endpoints = [
-                `${baseUrl}`,
-                `${baseUrl}/v1/test`,
-                `${baseUrl}/health`
-            ];
-            
-            for (const endpoint of endpoints) {
-                try {
-                    await this.makeSilentRequest(endpoint, {}, true, 5000);
-                    return true;
-                } catch (error) {
-                    // Silently continue to next endpoint
-                    continue;
-                }
+        const primaryUrl = this.getWhisperUrl();
+        const fallbackUrls = [
+            'http://localhost:8000',
+            'http://127.0.0.1:8000',
+            'https://localhost/stt',
+            `${window.location.protocol}//localhost:8000`
+        ].filter(url => url !== primaryUrl);
+        
+        // Try multiple endpoints
+        const baseUrl = primaryUrl;
+        const endpoints = [
+            `${baseUrl}`,
+            `${baseUrl}/v1/test`,
+            `${baseUrl}/health`
+        ];
+        
+        for (const endpoint of endpoints) {
+            try {
+                await this.makeSilentRequest(endpoint, {}, true, 5000);
+                return true;
+            } catch (error) {
+                continue;
             }
-            // If all endpoints fail, still return true since STT transcription works
-            return true;
-        } catch (error) {
-            // Silent failure - return true since transcription actually works
-            return true;
         }
+        
+        // For STT, return true even if health check fails (transcription might still work)
+        return true;
     }
     
-    // UPDATED: Fetch available models with dynamic URL
+    // Fetch available models
     static async fetchAvailableModels() {
         try {
             const data = await this.makeRequest(`${this.getOllamaUrl()}/api/tags`, {}, true, 10000);
@@ -470,7 +691,7 @@ export class ApiService {
         }
     }
     
-    // UPDATED: Send chat request with dynamic URL
+    // Send chat request
     static async sendChatRequest(messages, model, modelParams = null) {
         // Validate model parameter
         if (!model || model.trim() === '') {
@@ -524,7 +745,7 @@ export class ApiService {
         return await retryWithBackoff(makeRequest, 3, 1000);
     }
     
-    // UPDATED: Generate speech with dynamic URL
+    // Generate speech
     static async generateSpeech(text, voice) {
         // Limit text length to prevent memory issues
         if (text.length > CONFIG.MAX_TTS_LENGTH) {
@@ -566,7 +787,7 @@ export class ApiService {
         return await retryWithBackoff(makeRequest, 2, 2000);
     }
     
-    // UPDATED: Transcribe audio with dynamic URL
+    // Transcribe audio
     static async transcribeAudio(audioBlob, model = 'base') {
         if (!audioBlob || audioBlob.size === 0) {
             throw new Error('No audio data provided for transcription');
@@ -776,3 +997,6 @@ export class ApiService {
             - Cleared cache: ${clearedCache}`);
     }
 }
+
+// Initialize configuration listener on module load
+ApiService.initConfigListener();
