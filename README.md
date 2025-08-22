@@ -166,6 +166,10 @@ sudo systemctl restart ollama
 git clone https://github.com/remsky/Kokoro-FastAPI.git
 cd Kokoro-FastAPI
 docker-compose up -d
+
+#OR
+docker run -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-cpu:v0.1.4 # CPU, or:
+docker run --gpus all -p 8880:8880 ghcr.io/remsky/kokoro-fastapi-gpu:v0.1.4 #NVIDIA GPU
 ```
 
 ### 3. Whisper STT Setup (Optional)
