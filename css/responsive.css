@@ -1,0 +1,247 @@
+/* responsive.css */
+
+/* MOBILE RESPONSIVENESS - UPDATED for repositioned status elements */
+@media (max-width: 768px) {
+    .container {
+        padding: 0; /* Keep no padding on mobile too */
+        max-height: 92vh;
+        min-height: 80vh;
+        max-width: 90vw;
+    }
+    
+    /* Mobile header container - full width */
+    .header-container {
+        padding: 0.75rem 1.5rem; /* Reduced internal padding for mobile */
+        margin: 0;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+    
+    .header-spacer {
+        display: none; /* Hide spacer on mobile */
+    }
+    
+    .service-status {
+        order: 1;
+        width: 100%;
+        justify-content: center;
+        gap: 0.75rem;
+    }
+    
+    .settings-button {
+        order: 2;
+        align-self: center;
+    }
+    
+    /* Mobile adjustments for compact model selector */
+    .control-group select#modelSelect {
+        min-width: 180px !important;
+        max-width: 250px !important;
+        font-size: 0.8rem !important;
+    }
+
+    /* UPDATED: Mobile conversation container - now visible again but without header */
+    .conversation-container {
+        height: 400px;
+        margin-bottom: 0; /* Remove margin for full width */
+    }
+    
+    .conversation-header {
+        padding: 0.5rem 1rem;
+        /* Header is hidden via inline style but keep styles for consistency */
+    }
+    
+    .conversation-title {
+        font-size: 0.9rem;
+    }
+    
+    .clear-button {
+        padding: 0.375rem 0.75rem;
+        font-size: 0.8rem;
+    }
+    
+    .conversation-messages {
+        padding: 1rem;
+        gap: 1rem;
+        /* Now takes full container height since header is hidden */
+        height: 100%;
+    }
+    
+    .message {
+        max-width: 85%;
+    }
+    
+    .message-bubble {
+        padding: 0.65rem 0.85rem;
+        font-size: 0.85rem;
+        border-radius: 1.125rem;
+    }
+    
+    .message-time {
+        font-size: 0.65rem;
+    }
+    
+    .message .audio-player {
+        padding: 0.5rem;
+        max-width: 240px;
+    }
+    
+    /* Mobile input container - full width */
+    .input-container,
+    div.input-container {
+        margin: 0 !important;
+        margin-bottom: 0 !important;
+        padding: 1rem 1.5rem 0.5rem 1.5rem !important; /* Reduced internal padding for mobile */
+        display: flex !important;
+        align-items: center !important; /* Center everything vertically */
+    }
+    
+    /* FIXED: Mobile microphone button positioning with higher specificity */
+    .mic-button,
+    #micButton,
+    div#micButton {
+        right: 2.25rem !important; /* 1.5rem container padding + 0.75rem offset */
+        top: 50% !important; /* Keep mobile at perfect center since it was already good */
+        transform: translateY(-50%) !important; /* Perfect centering */
+    }
+    
+    /* Mobile character counter */
+    .char-counter {
+        padding-right: 1.5rem;
+        padding-left: 1.5rem;
+    }
+    
+    /* UPDATED: Mobile status message - repositioned but same styling */
+    .status-message {
+        font-size: 0.8rem; /* Slightly smaller on mobile but CONSISTENT */
+        padding: 0.65rem 1.5rem; /* Reduced internal padding for mobile */
+        min-height: 2rem; /* Proportionally smaller but fixed */
+        max-height: 100px;
+        line-height: 1.4; /* SAME line height as desktop */
+    }
+    
+    /* UPDATED: Mobile performance metrics - repositioned but same styling */
+    .performance-metrics {
+        padding: 0.65rem 1.5rem;
+    }
+    
+    .empty-icon {
+        font-size: 2.5rem;
+    }
+    
+    .empty-text {
+        font-size: 0.8rem;
+        max-width: 200px;
+    }
+    
+    .formatted-response {
+        font-size: 0.95em;
+    }
+    
+    .code-block pre {
+        font-size: 0.8em;
+        padding: 0.5rem;
+    }
+    
+    .list-item {
+        margin: 0.375rem 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 0; /* Keep no padding on very small mobile too */
+        max-height: 95vh;
+        min-height: 75vh;
+    }
+    
+    /* Very small mobile adjustments - full width */
+    .header-container {
+        padding: 0.5rem 1rem;
+        margin: 0;
+    }
+
+    /* Small mobile adjustments for compact model selector */
+    .control-group select#modelSelect {
+        min-width: 160px !important;
+        max-width: 200px !important;
+    }
+
+    /* UPDATED: Very small mobile conversation container */
+    .conversation-container {
+        height: 350px;
+    }
+    
+    .conversation-header {
+        padding: 0.4rem 0.75rem;
+        min-height: 2.5rem;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        /* Header is hidden via inline style but keep styles for consistency */
+    }
+    
+    .conversation-title {
+        font-size: 0.85rem;
+    }
+    
+    .turn-count {
+        font-size: 0.65rem;
+        padding: 0.15rem 0.5rem;
+    }
+    
+    .clear-button {
+        padding: 0.3rem 0.6rem;
+        font-size: 0.75rem;
+    }
+    
+    .message {
+        max-width: 90%;
+    }
+    
+    .message-bubble {
+        padding: 0.6rem 0.8rem;
+        font-size: 0.8rem;
+        border-radius: 1rem;
+    }
+    
+    .message .audio-player {
+        max-width: 200px;
+    }
+    
+    .input-container,
+    div.input-container {
+        margin: 0 !important;
+        margin-bottom: 0 !important;
+        padding: 1rem 1rem 0.5rem 1rem !important;
+        display: flex !important;
+        align-items: center !important; /* Center everything vertically */
+    }
+    
+    /* FIXED: Very small mobile microphone button positioning with higher specificity */
+    .mic-button,
+    #micButton,
+    div#micButton {
+        right: 1.75rem !important; /* 1rem container padding + 0.75rem offset */
+        top: 50% !important; /* Keep small mobile at perfect center since it was already good */
+        transform: translateY(-50%) !important; /* Perfect centering */
+    }
+    
+    .char-counter {
+        padding-right: 1rem;
+        padding-left: 1rem;
+    }
+    
+    /* UPDATED: Very small mobile status message - repositioned but same styling */
+    .status-message {
+        font-size: 0.75rem; /* Even smaller for very small screens but CONSISTENT */
+        padding: 0.6rem 1rem;
+        min-height: 1.8rem;
+        max-height: 90px;
+        line-height: 1.4; /* STILL the same line height */
+    }
+    
+    /* UPDATED: Very small mobile performance metrics - repositioned but same styling */
+    .performance-metrics {
+        padding: 0.6rem 1rem;
+    }
+}

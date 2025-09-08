@@ -26,10 +26,13 @@ export class StatusManager {
             tts: '--',
             total: '--'
         };
+        
+        // ADDED: Default timeout duration for all status messages
+        this.defaultTimeoutDuration = 5000; // 5 seconds - make this configurable if needed
     }
     
-    // Update main status message
-    updateStatus(message, type = 'info') {
+    // MODIFIED: Update main status message with optional timeout
+    updateStatus(message, type = 'info', autoTimeout = false) {
         // Clear any queued performance metrics when new message comes in
         this.clearMessageQueue();
         
@@ -39,6 +42,13 @@ export class StatusManager {
         // Ensure the status message is visible when there's content
         if (message.trim() !== '') {
             this.statusMessage.style.display = 'block';
+        }
+        
+        // ADDED: Apply timeout if requested
+        if (autoTimeout) {
+            this.currentTimeout = setTimeout(() => {
+                this.showQueuedPerformanceMetrics();
+            }, this.defaultTimeoutDuration);
         }
     }
     
@@ -133,29 +143,68 @@ export class StatusManager {
         return 0;
     }
     
-    // Show success status with auto-clear and queue performance metrics
-    showSuccess(message, autoClearDelay = 5000) {
+    // MODIFIED: Show success status with consistent timeout behavior
+    showSuccess(message, autoClearDelay = null) {
+        // Use default timeout if not specified
+        const timeoutDuration = autoClearDelay !== null ? autoClearDelay : this.defaultTimeoutDuration;
+        
         this.updateStatus(message, 'success');
         
-        if (autoClearDelay > 0) {
+        if (timeoutDuration > 0) {
             // Clear any existing timeout
             this.clearMessageQueue();
             
             // Set timeout to show performance metrics directly
             this.currentTimeout = setTimeout(() => {
-                this.showQueuedPerformanceMetrics(); // Show performance metrics directly
-            }, autoClearDelay);
+                this.showQueuedPerformanceMetrics();
+            }, timeoutDuration);
         }
     }
     
-    // Show error status
-    showError(message) {
+    // MODIFIED: Show error status with timeout
+    showError(message, autoClearDelay = null) {
+        // Use default timeout if not specified
+        const timeoutDuration = autoClearDelay !== null ? autoClearDelay : this.defaultTimeoutDuration;
+        
         this.updateStatus(message, 'error');
+        
+        if (timeoutDuration > 0) {
+            // Clear any existing timeout
+            this.clearMessageQueue();
+            
+            // Set timeout to clear error message
+            this.currentTimeout = setTimeout(() => {
+                this.showQueuedPerformanceMetrics();
+            }, timeoutDuration);
+        }
     }
     
-    // Show info status
-    showInfo(message) {
+    // MODIFIED: Show info status with timeout
+    showInfo(message, autoClearDelay = null) {
+        // Use default timeout if not specified
+        const timeoutDuration = autoClearDelay !== null ? autoClearDelay : this.defaultTimeoutDuration;
+        
         this.updateStatus(message, 'info');
+        
+        if (timeoutDuration > 0) {
+            // Clear any existing timeout
+            this.clearMessageQueue();
+            
+            // Set timeout to clear info message
+            this.currentTimeout = setTimeout(() => {
+                this.showQueuedPerformanceMetrics();
+            }, timeoutDuration);
+        }
+    }
+    
+    // ADDED: Method to set global timeout duration
+    setTimeoutDuration(duration) {
+        this.defaultTimeoutDuration = duration;
+    }
+    
+    // ADDED: Method to show persistent message (no timeout)
+    showPersistent(message, type = 'info') {
+        this.updateStatus(message, type, false);
     }
     
     // NEW: Clear message queue and timeouts

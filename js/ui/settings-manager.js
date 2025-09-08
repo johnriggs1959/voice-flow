@@ -569,8 +569,22 @@ export class SettingsManager {
     createAudioTab() {
         const currentVoice = this.getSetting('audio', 'voice');
         const currentSTTModel = this.getSetting('audio', 'sttModel');
+        const isMuted = this.getSetting('audio', 'muted') || false;
         
         return `
+            <div class="settings-section">
+                <h3 class="settings-section-title">Audio Output</h3>
+                <div class="settings-field">
+                    <label class="settings-field-label">
+                        <input type="checkbox" id="muteEnabled" ${isMuted ? 'checked' : ''}>
+                        Mute audio output
+                    </label>
+                    <div class="settings-field-description">
+                        Disable all audio playback from the AI assistant
+                    </div>
+                </div>
+            </div>
+            
             <div class="settings-section">
                 <h3 class="settings-section-title">Speech Recognition</h3>
                 <div class="settings-field">
@@ -714,6 +728,12 @@ export class SettingsManager {
                 // Update model dropdown when switching to model tab
                 if (tab.dataset.tab === 'model') {
                     this.updateModelDropdown();
+                }
+                // ADDED: Update storage stats when switching to logging tab
+                if (tab.dataset.tab === 'logging') {
+                    setTimeout(() => {
+                        this.updateStorageStats();
+                    }, 100);
                 }
             });
         });
@@ -931,6 +951,23 @@ export class SettingsManager {
                     window.aiAssistant.chatLogger.privacy.setRetentionDays(parseInt(value));
                 }
                 break;
+
+
+            case 'muteEnabled':
+                this.setSetting('audio', 'muted', checked);
+                // Update the main app's mute state if the change came from settings
+                if (window.aiAssistant) {
+                    window.aiAssistant.isMuted = checked;
+                    window.aiAssistant.updateMuteButtonVisual();
+                    window.aiAssistant.applyMuteToCurrentAudio();
+                    // Show status message
+                    const status = checked ? 'muted' : 'unmuted';
+                    if (window.aiAssistant.status) {
+                        window.aiAssistant.status.showInfo(`Audio ${status} via settings`);
+                    }
+                    console.log(`Mute state changed via settings to: ${checked}`);
+                }
+                break;                
         }
     }
     
@@ -1049,10 +1086,38 @@ export class SettingsManager {
     async handleClearAllLogs() {
         if (confirm('Are you sure you want to delete ALL conversation logs? This cannot be undone.')) {
             if (confirm('This will permanently delete all logs and analytics. Continue?')) {
-                if (window.aiAssistant?.chatLogger?.storage) {
-                    await window.aiAssistant.chatLogger.storage.clearAllData();
-                    this.showNotification('All logs cleared successfully', 'success');
+                try {
+                    if (window.aiAssistant?.chatLogger) {
+                        // 1. Clear IndexedDB storage (conversations, events, analytics)
+                        await window.aiAssistant.chatLogger.storage.clearAllData();
+                        
+                        // 2. Clear in-memory analytics data structures
+                        window.aiAssistant.chatLogger.analytics.reset();
+                        
+                        // 3. Clear localStorage analytics state
+                        localStorage.removeItem('ai-assistant-analytics-state');
+                        localStorage.removeItem('ai-assistant-analytics-aggregated');
+                        
+                        // 4. Clear any buffered logs
+                        window.aiAssistant.chatLogger.logBuffer = [];
+                        
+                        // 5. Start fresh session (resets session tracking)
+                        window.aiAssistant.chatLogger.startNewSession();
+                        
+                        this.showNotification('All logs and analytics cleared successfully', 'success');
+                    } else {
+                        // Fallback if chatLogger not available
+                        localStorage.removeItem('ai-assistant-analytics-state');
+                        localStorage.removeItem('ai-assistant-analytics-aggregated');
+                        this.showNotification('Cleared available analytics data', 'success');
+                    }
+                    
+                    // 6. Update storage stats display
                     this.updateStorageStats();
+                    
+                } catch (error) {
+                    console.error('Error clearing all logs:', error);
+                    this.showNotification(`Failed to clear all logs: ${error.message}`, 'error');
                 }
             }
         }
@@ -1065,6 +1130,7 @@ export class SettingsManager {
         
         if (window.aiAssistant?.chatLogger) {
             try {
+                // Get fresh stats after clearing
                 const storageStats = await window.aiAssistant.chatLogger.getStorageStats();
                 const analyticsData = window.aiAssistant.chatLogger.getAnalyticsSummary();
                 
@@ -1110,14 +1176,28 @@ export class SettingsManager {
                             <div class="stat-value">${oldest} - ${newest}</div>
                         </div>
                     `;
+                } else {
+                    // Show "No data" when everything is cleared
+                    html += `
+                        <div class="stat-item">
+                            <div class="stat-label">Date Range:</div>
+                            <div class="stat-value">No data</div>
+                        </div>
+                    `;
                 }
                 
                 html += '</div>';
+                
+                // Add a timestamp of when stats were last updated
+                html += `<div class="stats-updated" style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">
+                    Updated: ${new Date().toLocaleTimeString()}
+                </div>`;
+                
                 statsElement.innerHTML = html;
                 
             } catch (error) {
                 console.error('Error updating storage stats:', error);
-                statsElement.innerHTML = '<p>Error loading storage statistics</p>';
+                statsElement.innerHTML = '<p style="color: var(--text-error);">Error loading storage statistics</p>';
             }
         } else {
             statsElement.innerHTML = '<p>Logging system not initialized</p>';
@@ -1383,6 +1463,13 @@ export class SettingsManager {
             firstFocusable.focus();
         }
         
+        // ADDED: Update stats if opening directly to logging tab
+        if (this.currentTab === 'logging') {
+            setTimeout(() => {
+                this.updateStorageStats();
+            }, 100);
+        }
+
         // Trap focus within modal
         this.setupFocusTrap();
         

@@ -1,0 +1,533 @@
+/* conversation.css */
+
+/* CONVERSATION INTERFACE */
+/* UPDATED: Conversation container - adjusted for status area above */
+.conversation-container {
+    background: var(--bg-tertiary, rgba(255, 255, 255, 0.05));
+    border: none; /* Remove individual border */
+    /* REMOVED: Top border since status message now has it */
+    border-bottom: 1px solid var(--border-primary, rgba(255, 255, 255, 0.1)); /* Only bottom border for separation */
+    border-radius: 0; /* Remove border radius to extend to container edges */
+    /* CHANGED: Remove margin to extend to edges, add internal padding */
+    margin: 0;
+    padding: 0; /* Let internal elements handle their own padding */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 500px; /* Increased from 400px */
+    backdrop-filter: blur(5px);
+    flex: 1; /* Allow it to grow and take available space */
+    max-height: 60vh; /* Prevent it from becoming too large */
+}
+
+/* Compact Chat Header - Reduced height while keeping width (HIDDEN but keeping styles) */
+.conversation-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 1.5rem; /* Reduced from 1rem 1.5rem */
+    background: var(--bg-secondary, rgba(255, 255, 255, 0.1));
+    border-bottom: 1px solid var(--border-primary, rgba(255, 255, 255, 0.1));
+    flex-shrink: 0; /* Prevent header from shrinking */
+    min-height: 3rem; /* Reduced from default 4rem+ */
+}
+
+.conversation-title {
+    font-weight: 600;
+    font-size: 0.9rem; /* Slightly reduced from 1rem */
+    color: var(--text-primary, rgba(255, 255, 255, 0.95));
+}
+
+.turn-count {
+    font-size: 0.7rem; /* Reduced from 0.75rem */
+    color: var(--text-muted, rgba(255, 255, 255, 0.6));
+    background: var(--bg-accent, rgba(255, 255, 255, 0.1));
+    padding: 0.2rem 0.6rem; /* Reduced from 0.25rem 0.75rem */
+    border-radius: 0.8rem; /* Slightly reduced */
+}
+
+.clear-button {
+    background: var(--btn-secondary-bg, rgba(255, 255, 255, 0.1));
+    color: var(--text-primary, white);
+    padding: 0.4rem 0.8rem; /* Reduced from 0.5rem 1rem */
+    border-radius: var(--border-radius-sm, 0.5rem);
+    font-size: 0.8rem; /* Reduced from 0.875rem */
+    font-weight: 500;
+    transition: all var(--transition-duration, 0.3s) var(--transition-timing, ease-in-out);
+    border: 1px solid var(--border-primary, rgba(255, 255, 255, 0.2));
+    cursor: pointer;
+}
+
+.clear-button:hover {
+    background: var(--btn-secondary-hover, rgba(255, 255, 255, 0.2));
+    transform: translateY(-1px);
+}
+
+/* UPDATED: Messages Container - now takes full height since no header visible */
+.conversation-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.25rem; /* Slightly increased from 1rem */
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem; /* Increased from 1rem */
+    scroll-behavior: smooth;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-primary) transparent;
+    /* ADDED: Since header is hidden, messages area takes full container height */
+    height: 100%;
+}
+
+/* Webkit Scrollbar Styling */
+.conversation-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.conversation-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.conversation-messages::-webkit-scrollbar-thumb {
+    background: var(--border-primary, rgba(255, 255, 255, 0.2));
+    border-radius: 3px;
+    transition: background var(--transition-duration) var(--transition-timing);
+}
+
+.conversation-messages::-webkit-scrollbar-thumb:hover {
+    background: var(--border-accent, rgba(255, 255, 255, 0.3));
+}
+
+/* Empty State */
+.conversation-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    color: var(--text-muted, rgba(255, 255, 255, 0.5));
+    gap: 1rem;
+}
+
+.empty-icon {
+    font-size: 3rem;
+    opacity: 0.5;
+}
+
+.empty-text {
+    font-size: 0.875rem;
+    max-width: 250px;
+    line-height: 1.4;
+}
+
+/* Message Styling */
+.message {
+    display: flex;
+    flex-direction: column;
+    max-width: 80%;
+    margin-bottom: 0.5rem;
+    animation: messageSlideIn 0.3s ease-out;
+}
+
+@keyframes messageSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* User Messages (Right-aligned) */
+.user-message {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.user-message .message-bubble {
+    background: var(--btn-primary-bg, linear-gradient(135deg, #7c3aed, #db2777));
+    color: white;
+    border-bottom-right-radius: 0.375rem;
+}
+
+/* AI Messages (Left-aligned) */
+.ai-message {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.ai-message .message-bubble {
+    background: rgba(156, 163, 175, 0.15); /* Light gray background for dark mode */
+    color: var(--text-primary, rgba(255, 255, 255, 0.95));
+    border: 1px solid rgba(156, 163, 175, 0.2);
+    border-bottom-left-radius: 0.375rem;
+}
+
+.message-bubble {
+    padding: 0.75rem 1rem;
+    border-radius: 1.25rem;
+    word-wrap: break-word;
+    line-height: 1.4;
+    font-size: 0.9rem;
+    max-width: 100%;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all var(--transition-duration) var(--transition-timing);
+}
+
+.message-bubble:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Message Timestamp */
+.message-time {
+    font-size: 0.7rem;
+    color: var(--text-muted, rgba(255, 255, 255, 0.4));
+    margin-top: 0.25rem;
+    margin-bottom: 0.25rem;
+}
+
+.user-message .message-time {
+    text-align: right;
+}
+
+.ai-message .message-time {
+    text-align: left;
+}
+
+/* Audio Player in Messages */
+.message .audio-player {
+    margin-top: 0.75rem;
+    background: var(--audio-bg, rgba(255, 255, 255, 0.1));
+    padding: 0.75rem;
+    border-radius: var(--border-radius-sm, 0.5rem);
+    border: 1px solid var(--audio-border, rgba(255, 255, 255, 0.2));
+    max-width: 280px;
+}
+
+.message .audio-player audio {
+    width: 100%;
+    height: 32px;
+}
+
+/* Theme-specific Message Styling */
+[data-theme="light"] .user-message .message-bubble {
+    background: linear-gradient(135deg, #93c5fd, #bfdbfe); /* Light blue gradient */
+    color: rgba(0, 0, 0, 0.9); /* Dark text for contrast */
+}
+
+[data-theme="light"] .ai-message .message-bubble {
+    background: rgba(229, 231, 235, 0.95); /* Light gray (similar to Tailwind gray-200) */
+    color: rgba(0, 0, 0, 0.9);
+    border-color: rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="dark"] .ai-message .message-bubble {
+    background: rgba(156, 163, 175, 0.15); /* Light gray for dark theme */
+    color: rgba(255, 255, 255, 0.95);
+    border-color: rgba(156, 163, 175, 0.25);
+}
+
+[data-theme="light"] .conversation-messages::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+[data-theme="light"] .conversation-messages::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="current"] .user-message .message-bubble {
+    background: linear-gradient(135deg, #8b5cf6, #ec4899);
+}
+
+[data-theme="current"] .ai-message .message-bubble {
+    background: rgba(124, 58, 237, 0.1);
+    border-color: rgba(124, 58, 237, 0.2);
+}
+
+/* Typing Indicator Styling */
+.typing-indicator {
+    opacity: 0.8;
+}
+
+.typing-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+}
+
+.typing-dots span {
+    display: inline-block;
+    animation: typingPulse 1.4s infinite;
+    font-size: 0.8rem;
+    opacity: 0.4;
+}
+
+.typing-dots span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-dots span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes typingPulse {
+    0%, 60%, 100% {
+        opacity: 0.4;
+        transform: scale(1);
+    }
+    30% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+}
+
+/* Ensure typing indicator fits with theme */
+[data-theme="light"] .typing-indicator .message-bubble {
+    background: rgba(229, 231, 235, 0.95); /* Match AI message background */
+    color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="current"] .typing-indicator .message-bubble {
+    background: rgba(124, 58, 237, 0.1);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+[data-theme="dark"] .typing-indicator .message-bubble {
+    background: rgba(156, 163, 175, 0.15);
+    color: rgba(255, 255, 255, 0.8);
+}
+
+/* FORMATTED RESPONSE STYLES */
+.formatted-response {
+    line-height: 1.6;
+    width: 100%;
+}
+
+.formatted-response p {
+    margin: 0.5rem 0;
+}
+
+.formatted-response p:first-child {
+    margin-top: 0;
+}
+
+.formatted-response p:last-child {
+    margin-bottom: 0;
+}
+
+.formatted-response strong {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.formatted-response em {
+    font-style: italic;
+}
+
+/* List Styles - Updated for better spacing */
+.list-item {
+    display: flex;
+    align-items: flex-start;
+    margin: 0.4rem 0;
+    padding-left: 0;
+}
+
+.list-item + .list-item {
+    margin-top: 0.3rem;
+}
+
+.list-marker {
+    flex-shrink: 0;
+    min-width: 1.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+}
+
+.list-item.numbered .list-marker {
+    text-align: right;
+    padding-right: 0.5rem;
+}
+
+.list-item.bullet .list-marker {
+    font-size: 1em;
+    line-height: 1.4;
+    text-align: center;
+    min-width: 1.25rem;
+}
+
+.list-content {
+    flex: 1;
+    padding-left: 0;
+}
+
+/* Roman numeral lists */
+.list-item.numbered.roman .list-marker {
+    min-width: 2.5rem; /* Slightly wider for Roman numerals */
+}
+
+/* Letter lists (a., b., c.) */
+.list-item.numbered.letter .list-marker {
+    min-width: 2rem;
+}
+
+/* Spacer for better section separation */
+.formatted-response .spacer {
+    height: 0.75rem;
+}
+
+/* Improve spacing between different content sections */
+.formatted-response p + .list-item:first-of-type {
+    margin-top: 0.5rem;
+}
+
+.formatted-response .list-item:last-of-type + p {
+    margin-top: 0.75rem;
+}
+
+/* Code Styles - Enhanced */
+.code-block {
+    background: var(--bg-tertiary, rgba(0, 0, 0, 0.3));
+    border: 1px solid var(--border-primary, rgba(255, 255, 255, 0.1));
+    border-radius: var(--border-radius-sm, 0.5rem);
+    margin: 0.75rem 0;
+    overflow-x: auto;
+    position: relative;
+}
+
+.code-block[data-language]:not([data-language=""]):before {
+    content: attr(data-language);
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0.2rem 0.5rem;
+    font-size: 0.7rem;
+    color: var(--text-muted, rgba(255, 255, 255, 0.5));
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 0 var(--border-radius-sm, 0.5rem) 0 0.25rem;
+}
+
+.code-block pre {
+    margin: 0;
+    padding: 1rem;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    overflow-x: auto;
+}
+
+.code-block code {
+    background: none;
+    padding: 0;
+    border: none;
+    color: var(--text-primary, rgba(255, 255, 255, 0.9));
+    font-family: inherit;
+}
+
+.inline-code {
+    background: var(--bg-tertiary, rgba(255, 255, 255, 0.1));
+    padding: 0.15rem 0.35rem;
+    border-radius: 0.25rem;
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.875em;
+    color: var(--code-inline-color, #ff79c6);
+    border: 1px solid var(--border-primary, rgba(255, 255, 255, 0.1));
+    white-space: nowrap;
+}
+
+/* Better spacing between different content types */
+.formatted-response > .code-block:first-child,
+.formatted-response > .list-item:first-child {
+    margin-top: 0;
+}
+
+.formatted-response p + .code-block,
+.formatted-response p + .list-item,
+.formatted-response .list-item + p,
+.formatted-response .code-block + p {
+    margin-top: 0.75rem;
+}
+
+/* Light Theme Adjustments */
+[data-theme="light"] .code-block {
+    background: #f6f8fa;
+    border-color: #d1d5db;
+}
+
+[data-theme="light"] .code-block[data-language]:before {
+    background: rgba(0, 0, 0, 0.05);
+    color: rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="light"] .code-block code {
+    color: #24292e;
+}
+
+[data-theme="light"] .inline-code {
+    background: rgba(175, 184, 193, 0.2);
+    border-color: rgba(0, 0, 0, 0.1);
+    color: #e01e5a;
+}
+
+[data-theme="light"] .list-marker {
+    color: rgba(0, 0, 0, 0.7);
+}
+
+/* Remove default list styling from list-item divs */
+.list-item {
+    list-style: none !important;
+    list-style-type: none !important;
+}
+
+/* Ensure the formatted response container doesn't add list styling */
+.formatted-response {
+    list-style: none !important;
+}
+
+/* Remove any list styling from the message bubble */
+.message-bubble {
+    list-style: none !important;
+}
+
+/* Specifically target list items within AI messages to ensure no bullets */
+.ai-message .list-item {
+    list-style: none !important;
+    list-style-type: none !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+/* If bullets still appear, this nuclear option removes all list styling from the conversation area */
+.conversation-messages * {
+    list-style: none !important;
+    list-style-type: none !important;
+}
+
+/* Ensure list items display as intended without browser interference */
+.list-item {
+    display: flex;
+    align-items: flex-start;
+    margin: 0.4rem 0;
+    padding-left: 0;
+    list-style: none !important;
+    position: relative;
+}
+
+/* Remove any ::before or ::marker pseudo-elements that might add bullets */
+.list-item::before,
+.list-item::marker {
+    content: none !important;
+    display: none !important;
+}
+
+/* Ensure the list marker we want is the only one displayed */
+.list-item .list-marker {
+    flex-shrink: 0;
+    min-width: 1.75rem;
+    font-weight: 500;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.8));
+    /* Ensure this is the only visible marker */
+    list-style: none;
+}

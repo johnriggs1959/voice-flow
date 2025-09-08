@@ -317,8 +317,11 @@ constructor() {
         day: 'numeric' 
         });
         // Keep system message concise to save memory
-        return `You are ${name}, a voice assistant. Today is ${currentDate}. Reference previous topics when appropriate. Keep responses concise for natural speech. Use full words and speak numbers naturally: say "twenty-three degrees Fahrenheit" not "23F", "percent" not "%", "Doctor Smith" not "Dr. Smith". Always convert Roman numerals to spoken form in ALL contexts: for example, say "the third" not "III", "the second" not "II", "fifty-three" not "LIII", "thirty-eight" not "XXXVIII". For royalty and popes, use "the" before the number: "King Charles the third", "Queen Elizabeth the second". Always speak years in full: say "two thousand twenty-five" not "twenty-five".`;    }
-    
+        //return `You are ${name}, a voice assistant. Today is ${currentDate}. Reference previous topics when appropriate. Keep responses concise for natural speech. Use full words and speak numbers naturally: say "twenty-three degrees Fahrenheit" not "23F", "percent" not "%", "Doctor Smith" not "Dr. Smith". Always convert Roman numerals to spoken form in ALL contexts: for example, say "the third" not "III", "the second" not "II", "fifty-three" not "LIII", "thirty-eight" not "XXXVIII". For royalty and popes, use "the" before the number: "King Charles the third", "Queen Elizabeth the second". Always speak years in full: say "two thousand twenty-five" not "twenty-five".`;    }
+     // return `You are ${name}, a voice assistant. Today is ${currentDate}. Reference previous topics when appropriate. Keep responses concise for natural speech unless longer response is appropriate. Use full words and speak numbers naturally. Always convert Roman numerals to spoken form in ALL contexts. For royalty and popes, use "the" before the number.".`;    }
+        return `You are ${name}, a voice assistant. Today is ${currentDate}. Reference previous topics when appropriate. Keep responses concise for natural speech unless longer response is appropriate.`;    }
+     
+
     // Setup memory monitoring
     setupMemoryMonitoring() {
         // Monitor memory usage every 5 minutes

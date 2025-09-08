@@ -4,10 +4,9 @@ export const CONFIG = {
     // These are now just for reference/fallback - ApiService uses its own dynamic methods
     
     // Default settings
-    //DEFAULT_MODEL: 'llama3.2:3b',  // Updated default model to your latest version
     MAX_CONVERSATION_TURNS: 20,
     MAX_INPUT_LENGTH: 500,
-    MAX_TTS_LENGTH: 1500,
+    MAX_TTS_LENGTH: 2500,  // Increased to 2500 characters 
     
     // Timing constants
     RECORDING_TIMEOUT: 30000, // 30 seconds

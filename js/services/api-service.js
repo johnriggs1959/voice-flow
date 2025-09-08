@@ -634,8 +634,8 @@ export class ApiService {
         const result = await this.checkServiceWithFallback('tts', primaryUrl, fallbackUrls);
         return result.success;
     }
-    
-    // ENHANCED: Check STT status with fallback
+
+        // Enhanced STT status check that maintains flexibility while reducing console noise
     static async checkSTTStatus() {
         const primaryUrl = this.getWhisperUrl();
         const fallbackUrls = [
@@ -644,28 +644,54 @@ export class ApiService {
             'https://localhost/stt',
             `${window.location.protocol}//localhost:8000`
         ].filter(url => url !== primaryUrl);
-        
-        // Try multiple endpoints
+
+        // Try multiple endpoints in order of likelihood to work
         const baseUrl = primaryUrl;
         const endpoints = [
-            `${baseUrl}`,
-            `${baseUrl}/v1/test`,
-            `${baseUrl}/health`
+            `${baseUrl}/v1/test`,      // Most likely to work
+            `${baseUrl}/health`,       // Standard health endpoint
+            `${baseUrl}/v1/models`,    // OpenAI compatible models endpoint
+            `${baseUrl}`               // Root endpoint (most likely to 404)
         ];
-        
+
         for (const endpoint of endpoints) {
             try {
-                await this.makeSilentRequest(endpoint, {}, true, 5000);
-                return true;
+                const response = await fetch(endpoint, {
+                    method: 'GET',
+                    headers: { 'Accept': 'application/json' },
+                    signal: AbortSignal.timeout(5000)
+                });
+
+                if (response.ok) {
+                    // Only log success, not every attempt
+                    console.log(`✅ STT service online at: ${endpoint}`);
+                    return true;
+                }
+
+                // Don't log 404s as errors - they're expected for some endpoints
+                if (response.status === 404) {
+                    continue; // Silently try next endpoint
+                }
+
+                // Log other HTTP errors (5xx, etc.)
+                console.log(`⚠️ STT endpoint ${endpoint} returned ${response.status}`);
+                
             } catch (error) {
+                // Only log non-404 network errors
+                if (!error.message.includes('404')) {
+                    console.log(`STT check failed for ${endpoint}: ${error.message}`);
+                }
                 continue;
             }
         }
-        
-        // For STT, return true even if health check fails (transcription might still work)
+
+        // For STT, return true even if health checks fail (transcription might still work)
+        // This maintains your original logic
+        console.log('⚠️ STT health checks failed, but service may still work for transcription');
         return true;
     }
     
+
     // Fetch available models
     static async fetchAvailableModels() {
         try {

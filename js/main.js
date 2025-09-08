@@ -6,8 +6,10 @@ import { UIManager } from './ui/ui-manager.js';
 import { StatusManager } from './ui/status-manager.js';
 import { SettingsManager } from './ui/settings-manager.js';
 import { ConversationManager } from './utils/conversation.js';
-import { measureTime, validateInput, retryWithBackoff } from './utils/helpers.js';
+//import { measureTime, validateInput, retryWithBackoff } from './utils/helpers.js';
 import { ChatLogger } from './logging/chat-logger.js';
+import { measureTime, validateInput, retryWithBackoff, cleanTextForSpeech } from './utils/helpers.js';
+
 
 class AIAssistantApp {
     constructor() {
@@ -29,6 +31,10 @@ class AIAssistantApp {
         // Service check intervals
         this.serviceCheckInterval = null;
         this.memoryMonitorInterval = null;
+        
+        // NEW: Mute state management
+        this.isMuted = false;
+        this.muteButton = null;
         
         // Performance monitoring
         this.performanceStats = {
@@ -86,8 +92,11 @@ class AIAssistantApp {
         // Setup event listeners
         this.setupEventListeners();
         
-        // Initialize services
+        // Initialize services first (this ensures settings manager is ready)
         await this.initializeServices();
+        
+        // NEW: Initialize mute functionality AFTER settings are ready
+        this.initializeMuteFeature();
         
         // Initialize hidden dropdowns with settings values
         this.initializeHiddenDropdowns();
@@ -102,11 +111,158 @@ class AIAssistantApp {
         console.log('Application initialized successfully');
     }
     
+    // NEW: Initialize mute feature
+    initializeMuteFeature() {
+        this.muteButton = document.getElementById('muteButton');
+        if (!this.muteButton) {
+            console.warn('Mute button not found in DOM');
+            return;
+        }
+        
+        // Load mute state from settings or localStorage
+        this.loadMuteState();
+        
+        // Set up mute button event listener
+        this.muteButton.addEventListener('click', () => {
+            this.toggleMute();
+        });
+        
+        // Update initial visual state
+        this.updateMuteButtonVisual();
+        
+        console.log('Mute feature initialized, current state:', this.isMuted);
+    }
+    
+    // NEW: Load mute state from storage
+    loadMuteState() {
+        try {
+            // Try to get mute state from settings first (only if settings manager is ready)
+            if (this.settings && typeof this.settings.getSetting === 'function') {
+                const savedMute = this.settings.getSetting('audio', 'muted');
+                if (savedMute !== undefined) {
+                    this.isMuted = savedMute;
+                    return;
+                }
+            }
+            
+            // Fallback to localStorage for backwards compatibility
+            const localStorageMute = localStorage.getItem('ai-assistant-muted');
+            if (localStorageMute !== null) {
+                this.isMuted = localStorageMute === 'true';
+                // Migrate to settings if settings manager is ready
+                if (this.settings && typeof this.settings.saveSetting === 'function') {
+                    this.settings.saveSetting('audio', 'muted', this.isMuted);
+                    localStorage.removeItem('ai-assistant-muted');
+                }
+                return;
+            }
+            
+            // Default to unmuted
+            this.isMuted = false;
+            if (this.settings && typeof this.settings.saveSetting === 'function') {
+                this.settings.saveSetting('audio', 'muted', this.isMuted);
+            }
+        } catch (error) {
+            console.warn('Failed to load mute state:', error);
+            this.isMuted = false;
+        }
+    }
+    
+    // NEW: Save mute state to settings
+    saveMuteState() {
+        try {
+            // Only save to settings if settings manager is ready
+            if (this.settings && typeof this.settings.saveSetting === 'function') {
+                this.settings.saveSetting('audio', 'muted', this.isMuted);
+            } else {
+                // Fallback to localStorage if settings not ready
+                localStorage.setItem('ai-assistant-muted', this.isMuted.toString());
+                console.log('Settings manager not ready, saved mute state to localStorage as fallback');
+            }
+        } catch (error) {
+            console.warn('Failed to save mute state:', error);
+            // Last resort fallback to localStorage
+            try {
+                localStorage.setItem('ai-assistant-muted', this.isMuted.toString());
+                console.log('Used localStorage fallback after settings error');
+            } catch (fallbackError) {
+                console.error('Failed to save mute state to localStorage:', fallbackError);
+            }
+        }
+    }
+    
+    // NEW: Toggle mute state
+    toggleMute() {
+        this.isMuted = !this.isMuted;
+        this.saveMuteState();
+        this.updateMuteButtonVisual();
+        this.applyMuteToCurrentAudio();
+        
+        // ADDED: Update settings UI if settings panel is open
+        this.updateSettingsUIForMute();
+        
+        // Show status message
+        const status = this.isMuted ? 'muted' : 'unmuted';
+        this.status.showInfo(`Audio ${status}`);
+        
+        console.log('Mute toggled:', this.isMuted);
+    }
+    
+    // NEW: Update mute button visual state
+    updateMuteButtonVisual() {
+        if (!this.muteButton) return;
+        
+        const speakerOnIcon = this.muteButton.querySelector('.speaker-on');
+        const speakerOffIcon = this.muteButton.querySelector('.speaker-off');
+        
+        if (this.isMuted) {
+            speakerOnIcon.style.display = 'none';
+            speakerOffIcon.style.display = 'block';
+            this.muteButton.classList.add('muted');
+            this.muteButton.setAttribute('title', 'Unmute Audio');
+            this.muteButton.setAttribute('aria-label', 'Unmute Audio');
+        } else {
+            speakerOnIcon.style.display = 'block';
+            speakerOffIcon.style.display = 'none';
+            this.muteButton.classList.remove('muted');
+            this.muteButton.setAttribute('title', 'Mute Audio');
+            this.muteButton.setAttribute('aria-label', 'Mute Audio');
+        }
+    }
+    
+    // NEW: Apply mute to currently playing audio
+    applyMuteToCurrentAudio() {
+        if (this.audio.audioElement) {
+            this.audio.audioElement.muted = this.isMuted;
+        }
+    }
+    
+    // NEW: Update settings UI checkbox when mute state changes from main interface
+    updateSettingsUIForMute() {
+        // Only update if settings modal is open and the checkbox exists
+        if (this.settings && this.settings.isOpen) {
+            const muteCheckbox = document.getElementById('muteEnabled');
+            if (muteCheckbox) {
+                muteCheckbox.checked = this.isMuted;
+                console.log(`Updated settings mute checkbox to: ${this.isMuted}`);
+            }
+        }
+    }
+    
+    // NEW: Check if audio should be muted
+    isAudioMuted() {
+        return this.isMuted;
+    }
+    
     // Update audio element reference
     updateAudioElementReference() {
         const audioElement = this.ui.getAudioElement();
         if (audioElement) {
             this.audio.setAudioElement(audioElement);
+            // Apply current mute state to new audio element
+            if (this.isMuted) {
+                audioElement.muted = true;
+            }
         }
     }
     
@@ -230,7 +386,7 @@ class AIAssistantApp {
         });
     }
         
-    // UPDATED: Handle setting changes including model selection
+    // UPDATED: Handle setting changes including model selection and mute state
     handleSettingChange(event) {
         const { category, key, newValue } = event;
         
@@ -254,6 +410,12 @@ class AIAssistantApp {
                     sttModelSelect.value = newValue;
                 }
                 console.log(`STT model changed to: ${newValue}`);
+            } else if (key === 'muted') {
+                // Handle mute state change from settings (if changed externally)
+                this.isMuted = newValue;
+                this.updateMuteButtonVisual();
+                this.applyMuteToCurrentAudio();
+                console.log(`Mute state changed via settings to: ${newValue}`);
             }
         } else if (category === 'model') {
             if (key === 'selectedModel' && newValue) {
@@ -481,7 +643,7 @@ class AIAssistantApp {
     async processRecording(audioBlob) {
         try {
             // Start tracking performance for voice input
-            this.chatLogger.startTurnTracking('voice');
+            this.chatLogger.startTurnTracking('voice'); // ENSURE 'voice' is set
             
             // Get STT model from settings instead of UI
             const sttModel = this.settings.getSelectedSTTModel();
@@ -493,6 +655,11 @@ class AIAssistantApp {
             
             // Track STT performance in logger
             this.chatLogger.trackSTTPerformance(sttDuration, sttModel);
+            
+            // EXPLICITLY set input method in current metrics
+            if (this.chatLogger.currentTurnMetrics) {
+                this.chatLogger.currentTurnMetrics.inputMethod = 'voice';
+            }
             
             // Update UI with transcription
             this.ui.setInputValue(transcription);
@@ -612,7 +779,7 @@ class AIAssistantApp {
             console.warn(`Message count mismatch - UI: ${uiMessageCount}, Conversation: ${conversationMessageCount}, Turn count: ${currentTurnCount}`);
         }
 
-        // Generate speech
+        // UPDATED: Generate speech with mute check
         await this.generateAndPlaySpeech(response);
             
             // Complete turn tracking and log the full conversation turn
@@ -625,6 +792,7 @@ class AIAssistantApp {
                     speechRate: this.settings.getSetting('audio', 'speechRate'),
                     autoplay: this.settings.getSetting('audio', 'autoplay'),
                     volume: this.settings.getSetting('audio', 'volume'),
+                    muted: this.isMuted, // Include mute state in logging
                     theme: document.documentElement.getAttribute('data-theme'),
                     serviceStatus: {
                         llm: this.status.llmDot.classList.contains('online'),
@@ -670,16 +838,33 @@ class AIAssistantApp {
         }
     }
     
-    // Use settings manager for voice selection with TTS tracking
+    // UPDATED: Use settings manager for voice selection with TTS tracking and mute support
     async generateAndPlaySpeech(text) {
         try {
+            // Skip TTS generation if muted (save resources)
+            if (this.isMuted) {
+                this.status.showInfo('Audio output is muted');
+                return;
+            }
+            
+            // CLEAN TEXT BEFORE TTS - This removes asterisks and other problematic characters
+            const cleanedText = cleanTextForSpeech(text);
+            
+            // Log the cleaning for debugging
+            if (text !== cleanedText) {
+                console.log('TTS text cleaned:', {
+                    original: text.substring(0, 100) + (text.length > 100 ? '...' : ''),
+                    cleaned: cleanedText.substring(0, 100) + (cleanedText.length > 100 ? '...' : '')
+                });
+            }
+            
             // Get voice from settings instead of UI
             const voice = this.settings.getSelectedVoice();
             
-            // Generate speech and measure time
+            // Generate speech with cleaned text and measure time
             const { result: audioBlob, duration: ttsDuration } = await measureTime(async () => {
                 return await Promise.race([
-                    ApiService.generateSpeech(text, voice),
+                    ApiService.generateSpeech(cleanedText, voice), // Use cleaned text here
                     new Promise((_, reject) => 
                         setTimeout(() => reject(new Error('TTS request timeout')), 60000)
                     )
@@ -713,16 +898,20 @@ class AIAssistantApp {
             
             let playResult = { success: false, message: 'Audio ready for manual play' };
             
-            if (autoplay) {
-                // Pass speech rate to audio service
+            if (autoplay && !this.isMuted) {
+                // Pass speech rate to audio service and apply mute state
                 playResult = await this.audio.playAudio(audioUrl, speechRate);
+                // Ensure mute state is applied after playing starts
+                this.applyMuteToCurrentAudio();
             } else {
-                // Just load the audio without playing, but still set speech rate
+                // Just load the audio without playing, but still set speech rate and mute state
                 if (this.audio.audioElement) {
                     this.audio.audioElement.src = audioUrl;
                     this.audio.audioElement.playbackRate = speechRate;
+                    this.audio.audioElement.muted = this.isMuted;
                 }
-                playResult = { success: true, message: 'Audio loaded (autoplay disabled)' };
+                const muteMessage = this.isMuted ? ' (muted)' : ' (autoplay disabled)';
+                playResult = { success: true, message: 'Audio loaded' + muteMessage };
             }
             
             if (playResult.success) {
@@ -817,7 +1006,7 @@ class AIAssistantApp {
         console.log('Application cleanup completed');
     }
     
-    // Get application statistics with logging stats
+    // UPDATED: Get application statistics with logging stats and mute state
     getAppStats() {
         return {
             performance: this.performanceStats,
@@ -828,6 +1017,9 @@ class AIAssistantApp {
                 messagesInDOM: this.ui.getTotalMessagesInDOM()
             },
             settings: this.settings ? this.settings.getAllSettings() : {},
+            audio: {
+                muted: this.isMuted
+            },
             logging: this.chatLogger ? {
                 storage: this.chatLogger.getStorageStats(),
                 analytics: this.chatLogger.getAnalyticsSummary()
@@ -859,4 +1051,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.exportLogs = (format) => window.aiAssistant.exportChatLogs(format);
     window.getAnalytics = () => window.aiAssistant.getAnalytics();
     window.clearOldLogs = () => window.aiAssistant.chatLogger.clearOldLogs();
+    
+    // NEW: Expose mute functions for debugging
+    window.toggleMute = () => window.aiAssistant.toggleMute();
+    window.getMuteState = () => window.aiAssistant.isAudioMuted();
 });

@@ -7,57 +7,6 @@ export class UIManager {
         this.messageCount = 0; // Track total messages for limiting
     }
     
-    // Add this method to the UIManager class:
-    formatAIResponse(text) {
-        // Basic markdown parsing for better readability
-        let formatted = text;
-        
-        // Escape HTML first
-        formatted = formatted.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        
-        // Convert bold text
-        formatted = formatted.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
-        formatted = formatted.replace(/__(.+?)__/g, '<strong>$1</strong>');
-        
-        // Convert italic text
-        formatted = formatted.replace(/\*([^*]+?)\*/g, '<em>$1</em>');
-        formatted = formatted.replace(/_([^_]+?)_/g, '<em>$1</em>');
-        
-        // Convert numbered lists
-        formatted = formatted.replace(/^(\d+)\.\s+(.+)$/gm, (match, num, content) => {
-            return `<div class="list-item numbered"><span class="list-marker">${num}.</span><span class="list-content">${content}</span></div>`;
-        });
-        
-        // Convert bullet points (-, *, +)
-        formatted = formatted.replace(/^[-*+]\s+(.+)$/gm, (match, content) => {
-            return `<div class="list-item bullet"><span class="list-marker">•</span><span class="list-content">${content}</span></div>`;
-        });
-        
-        // Convert code blocks
-        formatted = formatted.replace(/```(\w+)?\n([\s\S]+?)```/g, (match, lang, code) => {
-            return `<div class="code-block" data-language="${lang || 'plain'}"><pre><code>${code.trim()}</code></pre></div>`;
-        });
-        
-        // Convert inline code
-        formatted = formatted.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
-        
-        // Convert line breaks to paragraphs
-        const paragraphs = formatted.split('\n\n').filter(p => p.trim());
-        formatted = paragraphs.map(p => {
-            // Check if it's already wrapped in a div (list item or code block)
-            if (p.startsWith('<div')) {
-                return p;
-            }
-            return `<p>${p.replace(/\n/g, '<br>')}</p>`;
-        }).join('');
-        
-        // Wrap in a container
-        return `<div class="formatted-response">${formatted}</div>`;
-    }
-
-    // REMOVED: Model change listener is now handled by settings manager
-    // The model selection is now managed through Settings->Model tab
-
     // Initialize DOM element references
     initializeElements() {
         for (const [key, id] of Object.entries(CONFIG.ELEMENTS)) {
@@ -70,6 +19,166 @@ export class UIManager {
         // Chat interface elements
         this.elements.conversationMessages = document.getElementById('conversationMessages');
         this.elements.conversationEmpty = document.getElementById('conversationEmpty');
+    }
+    
+    // Enhanced formatting method with Roman numeral support
+    formatAIResponse(text) {
+        // Basic markdown parsing for better readability
+        let formatted = text;
+        
+        // First, normalize line endings and fix numbered lists that lack spaces
+        formatted = formatted.replace(/\r\n/g, '\n');
+        formatted = formatted.replace(/(\d+)\.([A-Z])/g, '$1. $2'); // Fix "1.The" to "1. The"
+        
+        // IMPORTANT: Only convert asterisks to bullets if they're NOT followed by a space and number
+        // This prevents "* 1. Item" from being processed as a bullet point
+        formatted = formatted.replace(/^\*\s+(?!\d+\.)/gm, '• ');
+        
+        // Fix inline asterisks that should be emphasis (not at line start)
+        formatted = formatted.replace(/(?<!^)\*([^*\n]+)\*(?!\*)/gm, '_$1_');
+        
+        // Add line breaks before numbered lists that follow headers with colons
+        formatted = formatted.replace(/(:)\n(\d+\.)/g, '$1\n\n$2');
+        
+        // Add line breaks before Roman numeral lists
+        formatted = formatted.replace(/(:)\s*([IVX]+\.)/g, '$1\n\n$2');
+        
+        // Ensure Roman numerals at start of lines are on new lines
+        formatted = formatted.replace(/([.!?])\s+([IVX]+\.\s+[A-Z])/g, '$1\n\n$2');
+        
+        // Escape HTML to prevent XSS
+        formatted = formatted.replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        
+        // Process code blocks FIRST (before other replacements)
+        formatted = formatted.replace(/```(\w*)\n?([\s\S]*?)```/g, (match, lang, code) => {
+            const language = lang || 'plaintext';
+            const trimmedCode = code.trim();
+            return `<div class="code-block" data-language="${language}"><pre><code>${trimmedCode}</code></pre></div>`;
+        });
+        
+        // Convert inline code (after code blocks to avoid conflicts)
+        formatted = formatted.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+        
+        // Split into lines for processing
+        const lines = formatted.split('\n');
+        const processedLines = [];
+        let inNumberedList = false;
+        let inRomanList = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+            let line = lines[i].trim();
+            
+            // Skip empty lines
+            if (line === '') {
+                processedLines.push('');
+                inNumberedList = false;
+                inRomanList = false;
+                continue;
+            }
+            
+            // Skip if line is part of a code block (already processed)
+            if (line.includes('<div class="code-block"') || line.includes('</div>')) {
+                processedLines.push(line);
+                inNumberedList = false;
+                inRomanList = false;
+                continue;
+            }
+            
+            // Check for Roman numeral lists (I., II., III., IV., V., etc.)
+            const romanMatch = line.match(/^([IVX]+)\.\s+(.*)$/);
+            if (romanMatch) {
+                processedLines.push(`<div class="list-item numbered roman"><span class="list-marker">${romanMatch[1]}.</span><span class="list-content">${romanMatch[2]}</span></div>`);
+                inRomanList = true;
+                inNumberedList = false;
+                continue;
+            }
+            
+            // Check for numbered lists (1., 2., 3., etc.)
+            const numberedMatch = line.match(/^(\d+)\.\s+(.*)$/);
+            if (numberedMatch) {
+                processedLines.push(`<div class="list-item numbered"><span class="list-marker">${numberedMatch[1]}.</span><span class="list-content">${numberedMatch[2]}</span></div>`);
+                inNumberedList = true;
+                inRomanList = false;
+                continue;
+            }
+            
+            // Check for letter lists (a., b., c., A., B., C.)
+            const letterMatch = line.match(/^([a-zA-Z])\.\s+(.*)$/);
+            if (letterMatch && line.length > 3) { // Avoid matching single letters with periods
+                processedLines.push(`<div class="list-item numbered letter"><span class="list-marker">${letterMatch[1]}.</span><span class="list-content">${letterMatch[2]}</span></div>`);
+                inNumberedList = true;
+                inRomanList = false;
+                continue;
+            }
+            
+            // Process bullet points ONLY if:
+            // 1. We're not in a numbered/roman list
+            // 2. The line actually starts with a bullet marker
+            // 3. It's not a numbered list item that was incorrectly marked with a bullet
+            if (!inNumberedList && !inRomanList && /^[•\-+]\s/.test(line) && !/^[•\-+]\s*\d+\./.test(line)) {
+                const content = line.replace(/^[•\-+]\s+/, '');
+                processedLines.push(`<div class="list-item bullet"><span class="list-marker">•</span><span class="list-content">${content}</span></div>`);
+                continue;
+            }
+            
+            // If line doesn't match any list pattern, we're out of lists
+            if (!romanMatch && !numberedMatch && !letterMatch && !/^[•\-+]\s/.test(line)) {
+                inNumberedList = false;
+                inRomanList = false;
+            }
+            
+            // Convert bold text (handle both ** and __)
+            line = line.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            line = line.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+            
+            // Convert italic text (handle both * and _)
+            line = line.replace(/(?<!\*)\*(?!\*)([^*]+)(?<!\*)\*(?!\*)/g, '<em>$1</em>');
+            line = line.replace(/(?<!_)_(?!_)([^_]+)(?<!_)_(?!_)/g, '<em>$1</em>');
+            
+            processedLines.push(line);
+        }
+        
+        // Join lines back together
+        formatted = processedLines.join('\n');
+        
+        // Group consecutive lines into paragraphs, but preserve special elements
+        const finalLines = formatted.split('\n');
+        const paragraphs = [];
+        let currentParagraph = [];
+        
+        for (let line of finalLines) {
+            // Check if this is a special element that should stand alone
+            if (line.includes('<div class="list-item') || 
+                line.includes('<div class="code-block"') ||
+                line.includes('</div>') ||
+                line.trim() === '') {
+                
+                // Flush current paragraph if it exists
+                if (currentParagraph.length > 0) {
+                    paragraphs.push(`<p>${currentParagraph.join('<br>')}</p>`);
+                    currentParagraph = [];
+                }
+                
+                // Add special element or empty line
+                if (line.trim() !== '') {
+                    paragraphs.push(line);
+                } else if (paragraphs.length > 0 && !paragraphs[paragraphs.length - 1].includes('</p>')) {
+                    // Add spacing between sections
+                    paragraphs.push('<div class="spacer"></div>');
+                }
+            } else {
+                // Add to current paragraph
+                currentParagraph.push(line);
+            }
+        }
+        
+        // Flush any remaining paragraph
+        if (currentParagraph.length > 0) {
+            paragraphs.push(`<p>${currentParagraph.join('<br>')}</p>`);
+        }
+        
+        // Join all paragraphs and wrap in container
+        return `<div class="formatted-response">${paragraphs.join('\n')}</div>`;
     }
     
     // Character counter update

@@ -1,0 +1,290 @@
+/* header.css */
+
+/* UPDATED: Header container - now extends to container edges */
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* CHANGED: Maintain internal padding but extend to container edges */
+    padding: 1rem 2.5rem; /* Keep internal spacing but no margin */
+    margin: 0; /* Remove margin to extend to edges */
+    background: var(--bg-tertiary, rgba(255, 255, 255, 0.05)); /* Fallback */
+    border: none; /* Remove individual border since container has border */
+    border-bottom: 1px solid var(--border-primary, rgba(255, 255, 255, 0.2)); /* Only bottom border */
+    border-radius: 0; /* Remove border radius to extend to container edges */
+    /* ADDED: Ensure it respects container's top border radius */
+    border-top-left-radius: var(--border-radius-lg, 1rem);
+    border-top-right-radius: var(--border-radius-lg, 1rem);
+    backdrop-filter: blur(5px);
+    box-shadow: none; /* Remove individual shadow */
+    flex-shrink: 0;
+}
+
+/* Left spacer for balance */
+.header-spacer {
+    width: 32px; /* Same as settings button width */
+    flex-shrink: 0;
+}
+
+/* NEW: Header controls container for right-side buttons */
+.header-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-content {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.header-title {
+    flex: 1;
+    text-align: center;
+}
+
+/* NEW: Mute button styling */
+.mute-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    background: var(--button-bg, #2a2a2a);
+    color: var(--text-color, #fff);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0;
+    padding: 0;
+    position: relative;
+}
+
+.mute-button:hover {
+    background: var(--button-hover-bg, #3a3a3a);
+    border-color: var(--border-hover-color, #555);
+    transform: translateY(-1px);
+}
+
+.mute-button:active {
+    transform: translateY(0);
+    background: var(--button-active-bg, #1a1a1a);
+}
+
+/* Muted state styling */
+.mute-button.muted {
+    background: var(--error-bg, #dc3545);
+    border-color: var(--error-border, #dc3545);
+    color: white;
+}
+
+.mute-button.muted:hover {
+    background: var(--error-hover-bg, #c82333);
+    border-color: var(--error-hover-border, #c82333);
+}
+
+.mute-button.muted:active {
+    background: var(--error-active-bg, #bd2130);
+}
+
+/* Icon styling */
+.mute-button .mute-icon {
+    display: block;
+    width: 14px;
+    height: 14px;
+    transition: opacity 0.2s ease;
+}
+
+/* Subtle glow effect when muted */
+.mute-button.muted {
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+}
+
+/* UPDATED: Settings button to match mute button styling */
+.settings-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border: 1px solid var(--border-color, #333);
+    border-radius: 6px;
+    background: var(--button-bg, #2a2a2a);
+    color: var(--text-color, #fff);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0;
+    padding: 0;
+}
+
+.settings-button:hover {
+    background: var(--button-hover-bg, #3a3a3a);
+    border-color: var(--border-hover-color, #555);
+    transform: translateY(-1px);
+}
+
+.settings-button:active {
+    transform: translateY(0);
+    background: var(--button-active-bg, #1a1a1a);
+}
+
+.settings-button:focus,
+.mute-button:focus {
+    outline: 2px solid var(--status-info, #3b82f6); /* Fallback */
+    outline-offset: 2px;
+}
+
+/* MODIFIED: Updated service status styling for new layout */
+.service-status {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    flex: 1; /* Take up available space between spacer and settings */
+}
+
+/* Responsive adjustments for header controls */
+@media (max-width: 768px) {
+    .header-controls {
+        gap: 6px;
+    }
+    
+    .mute-button,
+    .settings-button {
+        width: 24px;
+        height: 24px;
+    }
+    
+    .mute-button .mute-icon {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .settings-button svg {
+        width: 12px;
+        height: 12px;
+    }
+    
+    .header-spacer {
+        display: none; /* Hide spacer on mobile for more space */
+    }
+    
+    .service-status {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .header-container {
+        padding: 0.75rem 1.5rem;
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .header-controls {
+        gap: 4px;
+    }
+    
+    .mute-button,
+    .settings-button {
+        width: 22px;
+        height: 22px;
+    }
+    
+    .mute-button .mute-icon {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .settings-button svg {
+        width: 10px;
+        height: 10px;
+    }
+    
+    .header-container {
+        padding: 0.5rem 1rem;
+    }
+}
+
+.status-indicator {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    background: var(--bg-secondary, rgba(255, 255, 255, 0.1)); /* Fallback */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid var(--border-primary, rgba(255, 255, 255, 0.2)); /* Fallback */
+}
+
+.status-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: 50%;
+}
+
+.online { background-color: var(--status-success, #10b981); } /* Fallback */
+.offline { background-color: var(--status-error, #ef4444); } /* Fallback */
+.checking { background-color: var(--status-warning, #eab308); } /* Fallback */
+
+/* Light theme overrides for mute and settings buttons */
+[data-theme="light"] .mute-button,
+[data-theme="light"] .settings-button {
+    background: var(--button-bg-light, #f8f9fa);
+    border-color: var(--border-color-light, #dee2e6);
+    color: var(--text-color-light, #212529);
+}
+
+[data-theme="light"] .mute-button:hover,
+[data-theme="light"] .settings-button:hover {
+    background: var(--button-hover-bg-light, #e9ecef);
+    border-color: var(--border-hover-color-light, #adb5bd);
+}
+
+[data-theme="light"] .mute-button:active,
+[data-theme="light"] .settings-button:active {
+    background: var(--button-active-bg-light, #dee2e6);
+}
+
+[data-theme="light"] .mute-button.muted {
+    background: var(--error-bg-light, #dc3545);
+    border-color: var(--error-border-light, #dc3545);
+    color: white;
+    box-shadow: 0 0 8px rgba(220, 53, 69, 0.2);
+}
+
+[data-theme="light"] .mute-button.muted:hover {
+    background: var(--error-hover-bg-light, #c82333);
+    border-color: var(--error-hover-border-light, #c82333);
+}
+
+[data-theme="light"] .mute-button.muted:active {
+    background: var(--error-active-bg-light, #bd2130);
+}
+
+[data-theme="light"] .mute-button:focus-visible,
+[data-theme="light"] .settings-button:focus-visible {
+    outline-color: var(--focus-color-light, #0056b3);
+}
+
+/* Theme-specific styling for header container */
+[data-theme="light"] .header-container {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(0, 0, 0, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="current"] .header-container {
+    background: rgba(124, 58, 237, 0.08);
+    border-color: rgba(124, 58, 237, 0.2);
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15);
+}
+
+[data-theme="dark"] .header-container {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}

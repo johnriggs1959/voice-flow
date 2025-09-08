@@ -1,0 +1,62 @@
+/* base.css */
+
+/* MODIFIED: Updated to use CSS custom properties from theme system */
+body {
+    background: var(--bg-primary, linear-gradient(to bottom, #4c1d95, #3b0764)); /* Fallback */
+    color: var(--text-primary, white); /* Fallback */
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    transition: background var(--transition-duration, 0.3s) var(--transition-timing, ease-in-out);
+}
+
+/* UPDATED: Main container with no padding for full width inner elements */
+.container {
+    max-width: 42rem; /* Increased from 36rem */
+    width: 100%;
+    background: var(--bg-secondary, rgba(255, 255, 255, 0.1)); /* Fallback */
+    border-radius: var(--border-radius-lg, 1rem); /* Fallback */
+    /* CHANGED: Removed padding to allow inner elements to extend to edges */
+    padding: 0; /* Remove all padding to allow full width inner elements */
+    box-shadow: var(--shadow-xl, 0 16px 64px rgba(0, 0, 0, 0.4)); /* Enhanced shadow for more depth */
+    backdrop-filter: blur(15px); /* Increased blur for more depth */
+    border: 1px solid var(--border-primary, rgba(255, 255, 255, 0.1)); /* Fallback */
+    max-height: 95vh; /* Increased from 90vh */
+    min-height: 85vh; /* Added minimum height for consistency */
+    display: flex;
+    flex-direction: column;
+    /* ADDED: Ensure container maintains border radius for inner elements */
+    overflow: hidden;
+}
+
+/* ENHANCED VISUAL DEPTH FOR CONTAINER */
+[data-theme="current"] .container {
+    box-shadow: 
+        0 16px 64px rgba(0, 0, 0, 0.4),
+        0 0 0 1px rgba(124, 58, 237, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .container {
+    box-shadow: 
+        0 16px 64px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(255, 255, 255, 0.05),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="light"] .container {
+    box-shadow: 
+        0 16px 64px rgba(0, 0, 0, 0.15),
+        0 0 0 1px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+/* SMOOTH TRANSITIONS */
+.conversation-container,
+.message-bubble,
+.clear-button,
+.header-container {
+    transition: all var(--transition-duration, 0.3s) var(--transition-timing, ease-in-out);
+}

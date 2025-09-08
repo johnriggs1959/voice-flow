@@ -54,14 +54,34 @@ export class AnalyticsCollector {
                 return;
             }
             
+            // ENHANCED duplicate detection with detailed logging
+            const entryId = `${logEntry.sessionId}-${logEntry.turnNumber}`;
+            console.log(`Processing analytics entry: ${entryId}`);
+            console.log(`Entry input method: ${logEntry.conversation?.inputMethod}`);
+            
+            if (this.processedEntries) {
+                if (this.processedEntries.has(entryId)) {
+                    console.log(`✓ Skipping duplicate analytics entry: ${entryId}`);
+                    return;
+                }
+                console.log(`✓ Adding new entry to processed set: ${entryId}`);
+                this.processedEntries.add(entryId);
+                console.log(`✓ Processed entries now contains: ${Array.from(this.processedEntries).join(', ')}`);
+            } else {
+                console.log(`✓ Initializing processed entries set with: ${entryId}`);
+                this.processedEntries = new Set([entryId]);
+            }
+            
             // Update session analytics
             this.updateSessionAnalytics(logEntry);
             
             // Update model performance
             this.updateModelPerformance(logEntry);
             
-            // Update usage patterns
+            // Update usage patterns (with extra logging)
+            console.log(`About to update usage patterns for: ${logEntry.conversation?.inputMethod}`);
             this.updateUsagePatterns(logEntry);
+            console.log(`Usage patterns after update: ${JSON.stringify(this.usagePatterns.inputMethods)}`);
             
             // Update quality metrics
             this.updateQualityMetrics(logEntry);
@@ -107,22 +127,22 @@ export class AnalyticsCollector {
     
     // ADDED: Helper method to determine input method from available data
     determineInputMethod(logEntry) {
+        // First check the explicit inputMethod field
+        const explicitMethod = this.safeGet(logEntry, 'conversation.inputMethod');
+        if (explicitMethod) {
+            return explicitMethod;
+        }
+        
         // Check if there's STT performance data (indicates voice input)
-        const sttTime = this.safeGet(logEntry, 'performance.sttTime', 0);
-        if (sttTime > 0) {
+        const sttTime = this.safeGet(logEntry, 'performance.sttTime');
+        if (sttTime && sttTime > 0) {
             return 'voice';
         }
         
-        // Check audio config for voice indicators
-        const voice = this.safeGet(logEntry, 'audioConfig.voice');
-        if (voice) {
+        // Check if STT model is specified in audio config
+        const sttModel = this.safeGet(logEntry, 'audioConfig.sttModel');
+        if (sttModel && sttModel !== 'base') { // 'base' might be default even for text
             return 'voice';
-        }
-        
-        // Check for conversation input method (if available)
-        const inputMethod = this.safeGet(logEntry, 'conversation.inputMethod');
-        if (inputMethod) {
-            return inputMethod;
         }
         
         // Default to text input
@@ -227,9 +247,18 @@ export class AnalyticsCollector {
             this.usagePatterns.hourly[hour]++;
             this.usagePatterns.daily[dayOfWeek]++;
             
-            // FIXED: Use helper method to determine input method
+            // FIXED: Use helper method to determine input method and only increment once
             const inputMethod = this.determineInputMethod(logEntry);
+            
+            // Ensure the input method exists in our tracking object
+            if (!this.usagePatterns.inputMethods[inputMethod]) {
+                this.usagePatterns.inputMethods[inputMethod] = 0;
+            }
+            
             this.usagePatterns.inputMethods[inputMethod]++;
+            
+            console.log(`Analytics: Recorded ${inputMethod} input method`);
+            
         } catch (error) {
             console.error('Error updating usage patterns:', error);
         }
@@ -599,6 +628,9 @@ export class AnalyticsCollector {
             const data = {
                 qualityMetrics: this.qualityMetrics,
                 usagePatterns: this.usagePatterns,
+                // Add session data
+                sessionCount: this.sessionAnalytics.size,
+                modelCount: this.modelPerformance.size,
                 timestamp: new Date().toISOString()
             };
             
@@ -611,17 +643,20 @@ export class AnalyticsCollector {
     // Reset analytics
     reset() {
         try {
+            // Clear all Maps and data structures
             this.sessionAnalytics.clear();
             this.modelPerformance.clear();
             this.errorPatterns.clear();
             this.topicCategories.clear();
             
+            // Reset usage patterns
             this.usagePatterns = {
                 hourly: new Array(24).fill(0),
                 daily: new Array(7).fill(0),
                 inputMethods: { text: 0, voice: 0 }
             };
             
+            // Reset quality metrics
             this.qualityMetrics = {
                 averageResponseTime: 0,
                 averageResponseLength: 0,
@@ -630,14 +665,28 @@ export class AnalyticsCollector {
                 totalTurns: 0
             };
             
+            // Reset real-time metrics
             this.realtimeMetrics = {
                 lastHourTurns: [],
                 last24HoursTurns: [],
                 responseTimeHistory: []
             };
             
-            this.saveAnalytics();
-            console.log('Analytics reset');
+            // Clear localStorage analytics
+            try {
+                localStorage.removeItem('ai-assistant-analytics-state');
+                localStorage.removeItem('ai-assistant-analytics-aggregated');
+                console.log('Analytics localStorage cleared');
+            } catch (error) {
+                console.warn('Failed to clear analytics localStorage:', error);
+            }
+            
+            // ADDED: Clear processed entries tracking
+            if (this.processedEntries) {
+                this.processedEntries.clear();
+            }
+
+            console.log('Analytics reset completed - all data cleared');
         } catch (error) {
             console.error('Error resetting analytics:', error);
         }

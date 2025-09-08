@@ -1,0 +1,66 @@
+/* status.css */
+
+/* HIDDEN PERFORMANCE METRICS - kept for JavaScript functionality but not displayed */
+.performance-metrics {
+    display: none !important; /* Keep hidden as intended */
+    justify-content: center;
+    gap: 1rem;
+    font-size: 0.75rem;
+    margin: 0;
+    padding: 0.75rem 2.5rem;
+    background: var(--bg-tertiary, rgba(255, 255, 255, 0.05)); /* Fallback */
+    border-radius: 0;
+    flex-wrap: wrap;
+    color: var(--text-secondary, rgba(255, 255, 255, 0.7)); /* Fallback */
+}
+
+/* REPOSITIONED STATUS MESSAGE - now first element after header */
+.status-message {
+    font-size: 0.875rem; /* Consistent font size for ALL message types */
+    text-align: center;
+    /* CHANGED: Remove margin-top, add padding for internal spacing */
+    margin: 0;
+    padding: 1rem 2.5rem; /* Internal padding instead of margin */
+    border-radius: 0; /* Remove border radius to extend to container edges */
+    min-height: 2.5rem; /* Fixed minimum height */
+    max-height: 120px;
+    overflow-y: auto;
+    word-wrap: break-word;
+    white-space: pre-wrap;
+    line-height: 1.4; /* Consistent line height for ALL message types */
+    transition: all var(--transition-duration) var(--transition-timing);
+    
+    /* ADDED: Ensure box stays visible even with content */
+    display: block !important;
+    visibility: visible !important;
+    
+    /* ADDED: Force consistent box model to prevent size changes */
+    box-sizing: border-box;
+    width: 100%;
+    
+    /* ADDED: Borders for separation from header and conversation area */
+    border-top: 1px solid var(--border-primary, rgba(255, 255, 255, 0.1));
+    border-bottom: 1px solid var(--border-primary, rgba(255, 255, 255, 0.1));
+}
+
+.status-message:not(:empty) {
+    border: 1px solid transparent;
+}
+
+.status-message.error {
+    background: rgba(239, 68, 68, 0.2);
+    color: #fca5a5;
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.status-message.success {
+    background: rgba(16, 185, 129, 0.2);
+    color: #6ee7b7;
+    border-color: rgba(16, 185, 129, 0.3);
+}
+
+.status-message.info {
+    background: rgba(59, 130, 246, 0.2);
+    color: #93c5fd;
+    border-color: rgba(59, 130, 246, 0.3);
+}

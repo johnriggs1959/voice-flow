@@ -128,6 +128,27 @@ export function generateId(prefix = 'id') {
 // Clean up text for speech synthesis
 export function cleanTextForSpeech(text) {
     return text
+        // Remove markdown emphasis markers FIRST (before other replacements)
+        .replace(/\*{1,3}([^*]+)\*{1,3}/g, '$1')  // Remove *, **, *** (asterisks for emphasis)
+        .replace(/_{1,3}([^_]+)_{1,3}/g, '$1')    // Remove _, __, ___ (underscores for emphasis)
+        
+        // Remove markdown code blocks and inline code
+        .replace(/```[^`]*```/g, '')              // Remove code blocks
+        .replace(/`([^`]+)`/g, '$1')              // Remove inline code backticks
+        
+        // Remove markdown headers
+        .replace(/^#{1,6}\s+/gm, '')              // Remove # headers
+        
+        // Remove markdown links but keep the text
+        .replace(/\[([^\]]+)\]\([^)]+\)/g, '$1')  // [text](url) -> text
+        
+        // Remove markdown lists markers
+        .replace(/^[\*\-\+]\s+/gm, '')            // Remove bullet points
+        .replace(/^\d+\.\s+/gm, '')               // Remove numbered lists
+        
+        // Remove HTML tags if any
+        .replace(/<[^>]*>/g, '')
+        
         // Convert common abbreviations
         .replace(/\bDr\./g, 'Doctor')
         .replace(/\bMr\./g, 'Mister')
@@ -137,14 +158,23 @@ export function cleanTextForSpeech(text) {
         .replace(/\bSt\./g, 'Saint')
         .replace(/\bAve\./g, 'Avenue')
         .replace(/\bBlvd\./g, 'Boulevard')
+        
         // Convert symbols to words
         .replace(/&/g, 'and')
         .replace(/%/g, 'percent')
         .replace(/\$/g, 'dollars')
         .replace(/#/g, 'number')
         .replace(/@/g, 'at')
+        
+        // Remove quotation marks (they don't read well in TTS)
+        .replace(/["'"'"]/g, '')
+        
+        // Handle ellipsis
+        .replace(/\.{3,}/g, '...')
+        
         // Remove or replace special characters that don't read well
-        .replace(/[^\w\s.,!?;:-]/g, ' ')
+        .replace(/[^\w\s.,!?;:\-]/g, ' ')
+        
         // Clean up multiple spaces
         .replace(/\s+/g, ' ')
         .trim();
